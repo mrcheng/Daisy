@@ -9,6 +9,7 @@ The firmware uses libDaisy and DaisySP to output a 220 Hz sine wave to both audi
 ```text
 .
 |-- src/main.cpp      # FirstSynth firmware
+|-- preview/index.html # Browser synth preview
 |-- Makefile          # Build/flash entry point
 |-- libDaisy          # Electro-Smith library submodule
 |-- DaisySP           # Electro-Smith DSP library submodule
@@ -150,6 +151,33 @@ This repo includes VS Code tasks:
 Use `Terminal > Run Build Task...` or press `Ctrl+Shift+B` to run the default build task.
 
 The workspace is configured to use Git Bash as the default integrated terminal on Windows.
+
+## Browser Preview
+
+The Daisy firmware cannot run directly on the PC. For quick sound-design work before flashing, this repo includes a browser preview that mirrors the starter synth settings with the Web Audio API.
+
+Open:
+
+```text
+preview/index.html
+```
+
+Or from the repo root on Windows:
+
+```powershell
+start preview/index.html
+```
+
+The preview lets you:
+
+- Trigger the synth sound.
+- Hold/release a continuous tone.
+- Change waveform.
+- Change frequency.
+- Change output gain.
+- Try quick A notes.
+
+Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
 
 ## Editing The Synth
 
