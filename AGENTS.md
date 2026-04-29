@@ -69,6 +69,8 @@ Use the existing tasks. Keep Git Bash as the default integrated terminal on Wind
 
 - Keep the bassdrum firmware simple and readable.
 - Prefer libDaisy and DaisySP APIs over custom low-level hardware code.
+- Do not use C++ libraries, OS APIs, dynamic allocation patterns, threading, file I/O, networking, exceptions, RTTI, or runtime features that are not compatible with Daisy Seed embedded firmware.
+- Any code added to `src/` must compile for the Daisy Seed target with the repo Makefile and the ARM embedded toolchain.
 - Keep audio callback code allocation-free and fast.
 - Use conservative output gain by default.
 - Do not commit build outputs from `build/`.
