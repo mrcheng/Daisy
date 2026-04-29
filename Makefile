@@ -1,5 +1,5 @@
 # Project Name
-TARGET = FirstSynth
+TARGET = KickiDanielsson
 
 # Default action
 .DEFAULT_GOAL := all

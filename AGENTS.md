@@ -1,6 +1,6 @@
 # Agent Notes
 
-This repo is a Daisy Seed C++ firmware project. Treat the repo root as the project root.
+This repo is a Daisy Seed C++ firmware project for the Kicki Danielsson bassdrum. Treat the repo root as the project root.
 
 ## Project Shape
 
@@ -67,7 +67,7 @@ Use the existing tasks. Keep Git Bash as the default integrated terminal on Wind
 
 ## Coding Guidelines
 
-- Keep starter firmware simple and readable.
+- Keep the bassdrum firmware simple and readable.
 - Prefer libDaisy and DaisySP APIs over custom low-level hardware code.
 - Keep audio callback code allocation-free and fast.
 - Use conservative output gain by default.

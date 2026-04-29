@@ -1,15 +1,15 @@
-# Daisy Seed FirstSynth
+# Kicki Danielsson
 
-A small C++ starter synth for the Electro-Smith Daisy Seed.
+A small sine-based bassdrum synth for the Electro-Smith Daisy Seed.
 
-The firmware uses libDaisy and DaisySP to output a 220 Hz sine wave to both audio channels at a safe gain of `0.2`.
+The firmware uses libDaisy and DaisySP to make a simple kick drum with a sine oscillator, pitch drop, amplitude decay, lowpass filtering, and resonance.
 
 ## Repository Layout
 
 ```text
 .
-|-- src/main.cpp      # FirstSynth firmware
-|-- preview/index.html # Browser synth preview
+|-- src/main.cpp       # Kicki Danielsson firmware
+|-- preview/index.html # Browser bassdrum preview
 |-- Makefile          # Build/flash entry point
 |-- libDaisy          # Electro-Smith library submodule
 |-- DaisySP           # Electro-Smith DSP library submodule
@@ -92,9 +92,9 @@ This builds `libDaisy`, `DaisySP`, and then the firmware.
 Build outputs are written to `build/`:
 
 ```text
-build/FirstSynth.elf
-build/FirstSynth.hex
-build/FirstSynth.bin
+build/KickiDanielsson.elf
+build/KickiDanielsson.hex
+build/KickiDanielsson.bin
 ```
 
 To clean only the firmware build:
@@ -154,7 +154,7 @@ The workspace is configured to use Git Bash as the default integrated terminal o
 
 ## Browser Preview
 
-The Daisy firmware cannot run directly on the PC. For quick sound-design work before flashing, this repo includes a browser preview that mirrors the starter synth settings with the Web Audio API.
+The Daisy firmware cannot run directly on the PC. For quick sound-design work before flashing, this repo includes a browser preview that mirrors the kick parameters with the Web Audio API.
 
 Open:
 
@@ -170,37 +170,50 @@ start preview/index.html
 
 The preview lets you:
 
-- Trigger the synth sound.
-- Hold/release a continuous tone.
-- Change waveform.
-- Change frequency.
+- Trigger the bassdrum.
+- Repeat the bassdrum every 750 ms.
+- Change base pitch.
+- Change pitch drop and pitch decay.
+- Change body decay.
+- Change lowpass cutoff and resonance.
 - Change output gain.
-- Try quick A notes.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
 
 ## Editing The Synth
 
-The starter firmware is in `src/main.cpp`.
+The firmware is in `src/main.cpp`.
 
-Change the pitch here:
-
-```cpp
-osc.SetFreq(220.0f);
-```
-
-Change the waveform here:
+Change the final body pitch here:
 
 ```cpp
-osc.SetWaveform(Oscillator::WAVE_SIN);
+constexpr float kBaseFreqHz = 48.0f;
 ```
 
-Other useful oscillator waveforms include `WAVE_TRI`, `WAVE_SAW`, and `WAVE_SQUARE`.
+Change the pitch drop here:
+
+```cpp
+constexpr float kPitchAmountHz = 112.0f;
+```
+
+Change the pitch decay and body decay here:
+
+```cpp
+constexpr float kPitchDecaySec = 0.055f;
+constexpr float kAmpDecaySec   = 0.36f;
+```
+
+Change the lowpass filter here:
+
+```cpp
+constexpr float kLowpassCutoffHz = 760.0f;
+constexpr float kResonance       = 0.62f;
+```
 
 Change the output volume here:
 
 ```cpp
-float sig = osc.Process() * 0.2f;
+constexpr float kOutputGain = 0.7f;
 ```
 
 Keep volume conservative when using headphones or speakers.
