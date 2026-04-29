@@ -146,19 +146,51 @@
             color: var(--warn);
         }
 
-        .meter {
-            height: 12px;
+        .vu {
             margin-top: 20px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .vu-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .vu-readout {
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .vu-bar {
+            position: relative;
+            height: 14px;
             overflow: hidden;
             border: 1px solid var(--line);
             border-radius: 999px;
-            background: #edf0ed;
+            background: linear-gradient(90deg, #edf0ed 0%, #edf0ed 68%, #f3e4bb 68%, #f3e4bb 88%, #eed0cd 88%);
         }
 
-        .meter-fill {
-            width: 70%;
+        .vu-fill {
+            width: 0%;
             height: 100%;
-            background: var(--accent);
+            background: linear-gradient(90deg, #1f7a68 0%, #1f7a68 68%, #c08b24 68%, #c08b24 88%, #a8423c 88%);
+            transition: width 70ms linear;
+        }
+
+        .vu-peak {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0%;
+            width: 2px;
+            background: var(--text);
+            opacity: 0.7;
         }
 
         @media (max-width: 760px) {
@@ -249,8 +281,15 @@
                 <button class="danger" id="stop">Stop</button>
             </div>
 
-            <div class="meter" aria-label="Output gain meter">
-                <div class="meter-fill" id="meterFill"></div>
+            <div class="vu" aria-label="Output VU meter">
+                <div class="vu-header">
+                    <span>VU</span>
+                    <span class="vu-readout" id="vuReadout">-inf dB</span>
+                </div>
+                <div class="vu-bar">
+                    <div class="vu-fill" id="vuFill"></div>
+                    <div class="vu-peak" id="vuPeak"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -258,6 +297,11 @@
     <script>
         const state = {
             audio: null,
+            master: null,
+            analyser: null,
+            meterFrame: null,
+            meterData: null,
+            vuLevel: 0,
             repeatTimer: null,
         };
 
@@ -276,14 +320,62 @@
             trigger: document.querySelector("#trigger"),
             repeat: document.querySelector("#repeat"),
             stop: document.querySelector("#stop"),
-            meterFill: document.querySelector("#meterFill"),
+            vuFill: document.querySelector("#vuFill"),
+            vuPeak: document.querySelector("#vuPeak"),
+            vuReadout: document.querySelector("#vuReadout"),
         };
 
         function getAudio() {
             if(!state.audio) {
                 state.audio = new AudioContext();
+                state.master = state.audio.createGain();
+                state.analyser = state.audio.createAnalyser();
+                state.analyser.fftSize = 1024;
+                state.meterData = new Float32Array(state.analyser.fftSize);
+
+                state.master.connect(state.analyser);
+                state.analyser.connect(state.audio.destination);
+
+                startVuMeter();
             }
             return state.audio;
+        }
+
+        function startVuMeter() {
+            if(state.meterFrame) {
+                return;
+            }
+
+            const tick = () => {
+                let rms = 0;
+                let peak = 0;
+
+                if(state.analyser) {
+                    state.analyser.getFloatTimeDomainData(state.meterData);
+
+                    for(const sample of state.meterData) {
+                        const abs = Math.abs(sample);
+                        rms += sample * sample;
+                        peak = Math.max(peak, abs);
+                    }
+
+                    rms = Math.sqrt(rms / state.meterData.length);
+                }
+
+                state.vuLevel = Math.max(rms, state.vuLevel * 0.9);
+
+                const vuPercent = Math.min(100, state.vuLevel * 170);
+                const peakPercent = Math.min(100, peak * 100);
+                const db = rms > 0.0001 ? `${(20 * Math.log10(rms)).toFixed(1)} dB` : "-inf dB";
+
+                els.vuFill.style.width = `${vuPercent}%`;
+                els.vuPeak.style.left = `${peakPercent}%`;
+                els.vuReadout.textContent = db;
+
+                state.meterFrame = requestAnimationFrame(tick);
+            };
+
+            state.meterFrame = requestAnimationFrame(tick);
         }
 
         function value(id) {
@@ -298,7 +390,6 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
-            els.meterFill.style.width = `${Math.min(100, value("gain") * 100)}%`;
         }
 
         async function triggerKick() {
@@ -311,6 +402,7 @@
             const pitchDecay = value("pitchDecay");
             const ampDecay = value("ampDecay");
             const gain = value("gain");
+            const resonance = value("resonance");
 
             const osc = audio.createOscillator();
             const filter = audio.createBiquadFilter();
@@ -322,7 +414,7 @@
 
             filter.type = "lowpass";
             filter.frequency.setValueAtTime(value("cutoff"), now);
-            filter.Q.setValueAtTime(0.5 + value("resonance") * 12.0, now);
+            filter.Q.setValueAtTime(0.5 + resonance * 12.0, now);
 
             amp.gain.setValueAtTime(0, now);
             amp.gain.linearRampToValueAtTime(gain, now + 0.002);
@@ -330,12 +422,12 @@
 
             osc.connect(filter);
             filter.connect(amp);
-            amp.connect(audio.destination);
+            amp.connect(state.master);
 
             osc.start(now);
             osc.stop(now + ampDecay + 0.08);
 
-            els.status.textContent = `Kick ${baseFreq.toFixed(0)} Hz`;
+            els.status.textContent = `Kick ${baseFreq.toFixed(0)} Hz, res ${resonance.toFixed(2)}`;
         }
 
         function toggleRepeat() {

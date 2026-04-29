@@ -177,6 +177,7 @@ The preview lets you:
 - Change body decay.
 - Change lowpass cutoff and resonance.
 - Change output gain.
+- Watch the real browser output VU meter.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
 
