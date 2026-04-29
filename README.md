@@ -109,6 +109,12 @@ To clean firmware and libraries:
 make clean-all
 ```
 
+To rebuild firmware and refresh the browser memory report:
+
+```bash
+python tools/update_memory_report.py
+```
+
 ## Flash With USB DFU
 
 Connect the Daisy Seed over USB.
@@ -178,8 +184,15 @@ The preview lets you:
 - Change lowpass cutoff and resonance.
 - Change output gain.
 - Watch the real browser output VU meter.
+- Watch the latest Daisy Seed memory usage from `preview/memory-report.js`.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
+
+After firmware changes, refresh the memory report with:
+
+```bash
+python tools/update_memory_report.py
+```
 
 ## Editing The Synth
 

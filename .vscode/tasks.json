@@ -53,6 +53,17 @@
             "problemMatcher": [
                 "$gcc"
             ]
+        },
+        {
+            "label": "update_memory_report",
+            "type": "shell",
+            "command": "python tools/update_memory_report.py",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
         }
     ]
 }

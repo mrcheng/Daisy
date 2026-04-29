@@ -84,4 +84,10 @@ Before reporting a firmware change complete, run:
 make
 ```
 
+After firmware changes, refresh the browser memory report:
+
+```bash
+python tools/update_memory_report.py
+```
+
 Mention whether flashing was performed. If not, explain that hardware DFU mode is required.

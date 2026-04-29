@@ -193,6 +193,73 @@
             opacity: 0.7;
         }
 
+        .memory {
+            margin-top: 20px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .memory-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .memory-time {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .memory-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .memory-row {
+            display: grid;
+            grid-template-columns: 96px 1fr 132px;
+            align-items: center;
+            gap: 12px;
+            min-height: 24px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .memory-name {
+            color: var(--text);
+            font-weight: 650;
+        }
+
+        .memory-track {
+            height: 10px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #edf0ed;
+        }
+
+        .memory-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent);
+        }
+
+        .memory-fill.warning {
+            background: #c08b24;
+        }
+
+        .memory-fill.danger {
+            background: var(--warn);
+        }
+
+        .memory-value {
+            color: var(--muted);
+            text-align: right;
+        }
+
         @media (max-width: 760px) {
             header {
                 align-items: start;
@@ -205,6 +272,15 @@
 
             .grid {
                 grid-template-columns: 1fr;
+            }
+
+            .memory-row {
+                grid-template-columns: 76px 1fr;
+            }
+
+            .memory-value {
+                grid-column: 1 / -1;
+                text-align: left;
             }
         }
     </style>
@@ -291,9 +367,18 @@
                     <div class="vu-peak" id="vuPeak"></div>
                 </div>
             </div>
+
+            <div class="memory" aria-label="Daisy Seed memory usage">
+                <div class="memory-header">
+                    <span>Daisy Seed Memory</span>
+                    <span class="memory-time" id="memoryTime">No report</span>
+                </div>
+                <div class="memory-grid" id="memoryGrid"></div>
+            </div>
         </section>
     </main>
 
+    <script src="memory-report.js"></script>
     <script>
         const state = {
             audio: null,
@@ -323,6 +408,8 @@
             vuFill: document.querySelector("#vuFill"),
             vuPeak: document.querySelector("#vuPeak"),
             vuReadout: document.querySelector("#vuReadout"),
+            memoryGrid: document.querySelector("#memoryGrid"),
+            memoryTime: document.querySelector("#memoryTime"),
         };
 
         function getAudio() {
@@ -390,6 +477,48 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
+        }
+
+        function renderMemoryReport() {
+            const report = window.KICKI_MEMORY_REPORT;
+            if(!report || !Array.isArray(report.regions)) {
+                els.memoryGrid.textContent = "Run python tools/update_memory_report.py to generate memory usage.";
+                return;
+            }
+
+            const generated = new Date(report.generatedAt);
+            els.memoryTime.textContent = Number.isNaN(generated.getTime())
+                ? report.target
+                : generated.toLocaleString();
+
+            els.memoryGrid.innerHTML = "";
+            report.regions.forEach((region) => {
+                const row = document.createElement("div");
+                const name = document.createElement("div");
+                const track = document.createElement("div");
+                const fill = document.createElement("div");
+                const value = document.createElement("div");
+
+                row.className = "memory-row";
+                name.className = "memory-name";
+                track.className = "memory-track";
+                fill.className = "memory-fill";
+                value.className = "memory-value";
+
+                if(region.percent >= 90) {
+                    fill.classList.add("danger");
+                } else if(region.percent >= 75) {
+                    fill.classList.add("warning");
+                }
+
+                name.textContent = region.name;
+                fill.style.width = `${Math.min(100, region.percent)}%`;
+                value.textContent = `${region.used} / ${region.total} (${region.percent.toFixed(2)}%)`;
+
+                track.appendChild(fill);
+                row.append(name, track, value);
+                els.memoryGrid.appendChild(row);
+            });
         }
 
         async function triggerKick() {
@@ -462,6 +591,7 @@
         els.stop.addEventListener("click", stopRepeat);
 
         updateReadouts();
+        renderMemoryReport();
     </script>
 </body>
 </html>
