@@ -1,0 +1,9 @@
+build/
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+*.d
+
+.vscode/.cortex-debug.*
