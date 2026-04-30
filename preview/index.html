@@ -179,6 +179,12 @@
             margin-top: 16px;
         }
 
+        .firmware-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .firmware-output textarea {
             width: 100%;
             min-height: 188px;
@@ -416,8 +422,6 @@
                 <button class="primary" id="trigger">Trigger</button>
                 <button class="secondary" id="repeat">Repeat</button>
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
-                <button class="secondary" id="printValues">Print Firmware Values</button>
-                <button class="secondary" id="copyValues">Copy Values</button>
                 <button class="danger" id="stop">Stop</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
@@ -429,6 +433,10 @@
 
             <div class="firmware-output" aria-label="Firmware values">
                 <textarea id="firmwareValues" spellcheck="false" readonly></textarea>
+                <div class="firmware-actions">
+                    <button class="secondary" id="printValues">Print Firmware Values</button>
+                    <button class="secondary" id="copyValues">Copy Values</button>
+                </div>
                 <div class="firmware-note">These are the constants to put in src/main.cpp before building and flashing the Daisy Seed.</div>
             </div>
 
