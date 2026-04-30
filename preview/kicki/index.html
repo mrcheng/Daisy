@@ -102,6 +102,13 @@
 
             <div class="section-heading">Good Vibrations</div>
             <p class="section-helper">The gritty shit that will make Kicki Danielsson vibrate</p>
+            <div class="control macro-control">
+                <label for="masterDist">Good vibrations/Masterdist</label>
+                <div class="value-row">
+                    <input id="masterDist" type="range" min="0.1" max="2" step="0.01" value="1">
+                    <span class="readout" id="masterDistReadout">1.00x</span>
+                </div>
+            </div>
             <div class="grid">
                 <div class="control effect-control">
                     <label class="toggle-label" for="simpleClipOn">
@@ -222,6 +229,7 @@
             repeatTimer: null,
             repeatMs: 750,
             tapTimes: [],
+            distMaster: 1,
         };
 
         const controls = {
@@ -234,6 +242,7 @@
             release: document.querySelector("#release"),
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
+            masterDist: document.querySelector("#masterDist"),
             simpleClipDrive: document.querySelector("#simpleClipDrive"),
             overdriveDrive: document.querySelector("#overdriveDrive"),
             wavefolderDrive: document.querySelector("#wavefolderDrive"),
@@ -272,6 +281,13 @@
             adsrDecayHandle: document.querySelector("#adsrDecayHandle"),
             adsrReleaseHandle: document.querySelector("#adsrReleaseHandle"),
         };
+
+        const distortionDriveIds = [
+            "simpleClipDrive",
+            "overdriveDrive",
+            "wavefolderDrive",
+            "saturationDrive",
+        ];
 
         function getAudio() {
             if(!state.audio) {
@@ -353,6 +369,7 @@
                 release: value("release"),
                 cutoff: value("cutoff"),
                 resonance: value("resonance"),
+                masterDist: value("masterDist"),
                 simpleClipOn: checked("simpleClipOn"),
                 simpleClipDrive: value("simpleClipDrive"),
                 overdriveOn: checked("overdriveOn"),
@@ -408,6 +425,7 @@
                     release: "release",
                     cutoff: "cutoff",
                     resonance: "resonance",
+                    masterDist: "masterDist",
                     simpleClipDrive: "simpleClipDrive",
                     overdriveDrive: "overdriveDrive",
                     wavefolderDrive: "wavefolderDrive",
@@ -434,6 +452,8 @@
                 if(typeof settings.saturationPost === "boolean") {
                     els.saturationPosition.value = settings.saturationPost ? "post" : "pre";
                 }
+
+                state.distMaster = value("masterDist");
             } catch(error) {
                 localStorage.removeItem(STORAGE_KEY);
             }
@@ -499,6 +519,7 @@
             document.querySelector("#releaseReadout").textContent = `${Math.round(value("release") * 1000)} ms`;
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
+            document.querySelector("#masterDistReadout").textContent = `${value("masterDist").toFixed(2)}x`;
             document.querySelector("#simpleClipDriveReadout").textContent = value("simpleClipDrive").toFixed(2);
             document.querySelector("#overdriveDriveReadout").textContent = value("overdriveDrive").toFixed(2);
             document.querySelector("#wavefolderDriveReadout").textContent = value("wavefolderDrive").toFixed(2);
@@ -667,6 +688,68 @@
                     updateFromAdsrDrag(name, event, handle);
                 }
             });
+        }
+
+        function stepRange(control, direction) {
+            if(direction > 0) {
+                control.stepUp();
+            } else {
+                control.stepDown();
+            }
+
+            control.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        function setupRangeSteppers() {
+            document.querySelectorAll('input[type="range"]').forEach((control) => {
+                const stepper = document.createElement("div");
+                const up = document.createElement("button");
+                const down = document.createElement("button");
+
+                stepper.className = "range-stepper";
+                up.className = "step-button";
+                down.className = "step-button";
+                up.type = "button";
+                down.type = "button";
+                up.textContent = "▲";
+                down.textContent = "▼";
+                up.setAttribute("aria-label", `Increase ${control.id}`);
+                down.setAttribute("aria-label", `Decrease ${control.id}`);
+
+                up.addEventListener("click", () => stepRange(control, 1));
+                down.addEventListener("click", () => stepRange(control, -1));
+
+                stepper.append(up, down);
+                const row = control.closest(".value-row") || control.parentElement;
+                row?.appendChild(stepper);
+            });
+        }
+
+        function scaleDistortionControls(nextMaster) {
+            const previousMaster = Math.max(0.01, state.distMaster);
+            const requestedRatio = nextMaster / previousMaster;
+            let ratio = requestedRatio;
+
+            if(requestedRatio > 1) {
+                const headrooms = distortionDriveIds
+                    .map((id) => {
+                        const current = value(id);
+                        const max = Number(controls[id].max);
+                        return current > 0 ? max / current : Number.POSITIVE_INFINITY;
+                    })
+                    .filter((headroom) => Number.isFinite(headroom));
+
+                if(headrooms.length > 0) {
+                    ratio = Math.min(requestedRatio, Math.min(...headrooms));
+                }
+            }
+
+            distortionDriveIds.forEach((id) => {
+                setControl(id, value(id) * ratio);
+            });
+
+            state.distMaster = previousMaster * ratio;
+            setControl("masterDist", state.distMaster);
         }
 
         function hardClip(sig, drive) {
@@ -840,6 +923,10 @@
 
         Object.values(controls).forEach((control) => {
             control.addEventListener("input", () => {
+                if(control === controls.masterDist) {
+                    scaleDistortionControls(value("masterDist"));
+                }
+
                 updateReadouts();
                 updateFirmwareValues();
                 saveSettings();
@@ -865,6 +952,7 @@
         setupAdsrDrag(els.adsrAttackHandle, "attack");
         setupAdsrDrag(els.adsrDecayHandle, "decay");
         setupAdsrDrag(els.adsrReleaseHandle, "release");
+        setupRangeSteppers();
 
         els.trigger.addEventListener("click", triggerKick);
         els.repeat.addEventListener("click", toggleRepeat);
