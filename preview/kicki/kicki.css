@@ -61,11 +61,15 @@ h1 {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 14px;
+    margin: 20px 0 14px;
     color: var(--text);
     font-size: 13px;
     font-weight: 750;
     text-transform: uppercase;
+}
+
+.surface > .section-heading:first-child {
+    margin-top: 0;
 }
 
 .section-heading::after {
@@ -79,6 +83,11 @@ h1 {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
+}
+
+.compact-grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 420px;
 }
 
 .control {
