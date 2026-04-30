@@ -1,8 +1,12 @@
-# Kicki Danielsson
+# Daisy Drums
 
-A small sine-based bassdrum synth for the Electro-Smith Daisy Seed.
+Small drum synth experiments for the Electro-Smith Daisy Seed.
 
-The firmware uses libDaisy and DaisySP to make a simple kick drum with a sine oscillator, pitch drop, amplitude decay, lowpass filtering, and resonance.
+## Test In Browser
+
+- [Kicki Danielsson browser preview](https://mrcheng.github.io/Daisy/preview/kicki/)
+
+Kicki Danielsson is a sine-based bassdrum. The firmware uses libDaisy and DaisySP to make a simple kick drum with a sine oscillator, pitch drop, ADSR amplitude shaping, lowpass filtering, resonance, and Daisy-safe distortion options.
 
 ## Repository Layout
 
