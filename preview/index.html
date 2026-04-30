@@ -241,6 +241,11 @@
             font-weight: 500;
         }
 
+        .memory-note {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
         .memory-grid {
             display: grid;
             gap: 8px;
@@ -410,10 +415,11 @@
 
             <div class="memory" aria-label="Daisy Seed memory usage">
                 <div class="memory-header">
-                    <span>Daisy Seed Memory</span>
+                    <span>Daisy Seed Memory Snapshot</span>
                     <span class="memory-time" id="memoryTime">No report</span>
                 </div>
                 <div class="memory-grid" id="memoryGrid"></div>
+                <div class="memory-note">Refresh after firmware changes: python tools/update_memory_report.py</div>
             </div>
         </section>
     </main>
