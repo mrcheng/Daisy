@@ -92,6 +92,17 @@
             accent-color: var(--accent);
         }
 
+        input[type="number"] {
+            width: 82px;
+            height: 36px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #fff;
+            color: var(--text);
+            padding: 0 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
         .value-row {
             display: grid;
             grid-template-columns: 1fr auto;
@@ -356,6 +367,14 @@
                         <span class="readout" id="gainReadout">0.70</span>
                     </div>
                 </div>
+
+                <div class="control">
+                    <label for="bpm">BPM</label>
+                    <div class="value-row">
+                        <input id="bpm" type="range" min="30" max="300" step="1" value="80">
+                        <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
+                    </div>
+                </div>
             </div>
 
             <div class="actions">
@@ -409,6 +428,8 @@
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
             gain: document.querySelector("#gain"),
+            bpm: document.querySelector("#bpm"),
+            bpmNumber: document.querySelector("#bpmNumber"),
         };
 
         const els = {
@@ -482,6 +503,31 @@
             return Number(controls[id].value);
         }
 
+        function clamp(valueToClamp, min, max) {
+            return Math.max(min, Math.min(max, valueToClamp));
+        }
+
+        function bpmFromRepeatMs() {
+            return Math.round(60000 / state.repeatMs);
+        }
+
+        function setBpm(bpm, shouldRestart = true, preserveTapHistory = false) {
+            const clamped = clamp(Math.round(bpm), 30, 300);
+            state.repeatMs = 60000 / clamped;
+            controls.bpm.value = String(clamped);
+            controls.bpmNumber.value = String(clamped);
+
+            if(!preserveTapHistory) {
+                state.tapTimes = [];
+            }
+
+            if(shouldRestart) {
+                restartRepeatIfRunning();
+            }
+
+            updateReadouts();
+        }
+
         function updateReadouts() {
             document.querySelector("#baseFreqReadout").textContent = `${value("baseFreq").toFixed(0)} Hz`;
             document.querySelector("#pitchAmountReadout").textContent = `${value("pitchAmount").toFixed(0)} Hz`;
@@ -490,7 +536,7 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
-            els.tempoReadout.textContent = `${Math.round(60000 / state.repeatMs)} BPM`;
+            els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
         }
 
         function startRepeat() {
@@ -627,18 +673,19 @@
                 }
 
                 const average = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
-                state.repeatMs = Math.max(200, Math.min(2000, average));
-                restartRepeatIfRunning();
-                updateReadouts();
+                setBpm(60000 / average, true, true);
             }
 
             triggerKick();
-            els.status.textContent = `Tap tempo ${Math.round(60000 / state.repeatMs)} BPM`;
+            els.status.textContent = `Tap tempo ${bpmFromRepeatMs()} BPM`;
         }
 
         Object.values(controls).forEach((control) => {
             control.addEventListener("input", updateReadouts);
         });
+
+        controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
+        controls.bpmNumber.addEventListener("input", () => setBpm(value("bpmNumber")));
 
         els.trigger.addEventListener("click", triggerKick);
         els.repeat.addEventListener("click", toggleRepeat);

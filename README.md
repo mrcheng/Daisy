@@ -178,6 +178,7 @@ The preview lets you:
 
 - Trigger the bassdrum.
 - Repeat the bassdrum every 750 ms.
+- Set BPM manually.
 - Tap a tempo for the repeat rate.
 - Change base pitch.
 - Change pitch drop and pitch decay.
