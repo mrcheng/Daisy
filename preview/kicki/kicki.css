@@ -175,6 +175,46 @@ select:disabled {
     text-align: right;
 }
 
+.adsr-panel {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.adsr-graph {
+    width: 100%;
+    height: 150px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fbfcfb;
+    touch-action: none;
+}
+
+.adsr-graph polyline {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.adsr-handle {
+    fill: #fff;
+    stroke: var(--accent);
+    stroke-width: 3;
+    cursor: grab;
+}
+
+.adsr-handle:active {
+    cursor: grabbing;
+}
+
+.adsr-controls {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+
 .actions {
     display: flex;
     flex-wrap: wrap;
@@ -391,6 +431,10 @@ button {
     }
 
     .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .adsr-controls {
         grid-template-columns: 1fr;
     }
 

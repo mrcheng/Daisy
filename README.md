@@ -182,7 +182,7 @@ The preview lets you:
 - Tap a browser preview tempo.
 - Change base pitch.
 - Change pitch drop and pitch decay.
-- Change body decay.
+- Shape the amp envelope with the ADSR graph.
 - Change lowpass cutoff and resonance.
 - Enable simple clipping, DaisySP Overdrive, wavefolder, and saturation.
 - Change output gain.

@@ -41,14 +41,6 @@
                 </div>
 
                 <div class="control">
-                    <label for="ampDecay">Body decay</label>
-                    <div class="value-row">
-                        <input id="ampDecay" type="range" min="0.05" max="1.2" step="0.01" value="0.36">
-                        <span class="readout" id="ampDecayReadout">360 ms</span>
-                    </div>
-                </div>
-
-                <div class="control">
                     <label for="cutoff">Lowpass cutoff</label>
                     <div class="value-row">
                         <input id="cutoff" type="range" min="80" max="3000" step="10" value="760">
@@ -61,6 +53,49 @@
                     <div class="value-row">
                         <input id="resonance" type="range" min="0" max="1" step="0.01" value="0.62">
                         <span class="readout" id="resonanceReadout">0.62</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="adsr-panel">
+                <label>ADSR</label>
+                <svg id="adsrGraph" class="adsr-graph" viewBox="0 0 360 150" role="img" aria-label="ADSR envelope editor">
+                    <polyline id="adsrLine" points=""></polyline>
+                    <circle class="adsr-handle" id="adsrAttackHandle" r="7"></circle>
+                    <circle class="adsr-handle" id="adsrDecayHandle" r="7"></circle>
+                    <circle class="adsr-handle" id="adsrReleaseHandle" r="7"></circle>
+                </svg>
+                <div class="adsr-controls">
+                    <div class="control">
+                        <label for="attack">Attack</label>
+                        <div class="value-row">
+                            <input id="attack" type="range" min="0.001" max="0.2" step="0.001" value="0.004">
+                            <span class="readout" id="attackReadout">4 ms</span>
+                        </div>
+                    </div>
+
+                    <div class="control">
+                        <label for="ampDecay">Decay</label>
+                        <div class="value-row">
+                            <input id="ampDecay" type="range" min="0.02" max="1.2" step="0.01" value="0.36">
+                            <span class="readout" id="ampDecayReadout">360 ms</span>
+                        </div>
+                    </div>
+
+                    <div class="control">
+                        <label for="sustain">Sustain</label>
+                        <div class="value-row">
+                            <input id="sustain" type="range" min="0" max="1" step="0.01" value="0.04">
+                            <span class="readout" id="sustainReadout">0.04</span>
+                        </div>
+                    </div>
+
+                    <div class="control">
+                        <label for="release">Release</label>
+                        <div class="value-row">
+                            <input id="release" type="range" min="0.005" max="0.5" step="0.005" value="0.06">
+                            <span class="readout" id="releaseReadout">60 ms</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -193,7 +228,10 @@
             baseFreq: document.querySelector("#baseFreq"),
             pitchAmount: document.querySelector("#pitchAmount"),
             pitchDecay: document.querySelector("#pitchDecay"),
+            attack: document.querySelector("#attack"),
             ampDecay: document.querySelector("#ampDecay"),
+            sustain: document.querySelector("#sustain"),
+            release: document.querySelector("#release"),
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
             simpleClipDrive: document.querySelector("#simpleClipDrive"),
@@ -228,6 +266,11 @@
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
             saturationPosition: document.querySelector("#saturationPosition"),
+            adsrGraph: document.querySelector("#adsrGraph"),
+            adsrLine: document.querySelector("#adsrLine"),
+            adsrAttackHandle: document.querySelector("#adsrAttackHandle"),
+            adsrDecayHandle: document.querySelector("#adsrDecayHandle"),
+            adsrReleaseHandle: document.querySelector("#adsrReleaseHandle"),
         };
 
         function getAudio() {
@@ -304,7 +347,10 @@
                 baseFreq: value("baseFreq"),
                 pitchAmount: value("pitchAmount"),
                 pitchDecay: value("pitchDecay"),
+                attack: value("attack"),
                 ampDecay: value("ampDecay"),
+                sustain: value("sustain"),
+                release: value("release"),
                 cutoff: value("cutoff"),
                 resonance: value("resonance"),
                 simpleClipOn: checked("simpleClipOn"),
@@ -356,7 +402,10 @@
                     baseFreq: "baseFreq",
                     pitchAmount: "pitchAmount",
                     pitchDecay: "pitchDecay",
+                    attack: "attack",
                     ampDecay: "ampDecay",
+                    sustain: "sustain",
+                    release: "release",
                     cutoff: "cutoff",
                     resonance: "resonance",
                     simpleClipDrive: "simpleClipDrive",
@@ -397,7 +446,10 @@
                 "constexpr float kBaseFreqHz       = " + settings.baseFreq.toFixed(1) + "f;",
                 "constexpr float kPitchAmountHz    = " + settings.pitchAmount.toFixed(1) + "f;",
                 "constexpr float kPitchDecaySec    = " + settings.pitchDecay.toFixed(3) + "f;",
+                "constexpr float kAttackSec        = " + settings.attack.toFixed(3) + "f;",
                 "constexpr float kAmpDecaySec      = " + settings.ampDecay.toFixed(3) + "f;",
+                "constexpr float kSustainLevel     = " + settings.sustain.toFixed(2) + "f;",
+                "constexpr float kReleaseSec       = " + settings.release.toFixed(3) + "f;",
                 "constexpr float kLowpassCutoffHz  = " + settings.cutoff.toFixed(1) + "f;",
                 "constexpr float kResonance        = " + settings.resonance.toFixed(2) + "f;",
                 "constexpr bool  kSimpleClipOn     = " + String(settings.simpleClipOn) + ";",
@@ -441,7 +493,10 @@
             document.querySelector("#baseFreqReadout").textContent = `${value("baseFreq").toFixed(0)} Hz`;
             document.querySelector("#pitchAmountReadout").textContent = `${value("pitchAmount").toFixed(0)} Hz`;
             document.querySelector("#pitchDecayReadout").textContent = `${Math.round(value("pitchDecay") * 1000)} ms`;
+            document.querySelector("#attackReadout").textContent = `${Math.round(value("attack") * 1000)} ms`;
             document.querySelector("#ampDecayReadout").textContent = `${Math.round(value("ampDecay") * 1000)} ms`;
+            document.querySelector("#sustainReadout").textContent = value("sustain").toFixed(2);
+            document.querySelector("#releaseReadout").textContent = `${Math.round(value("release") * 1000)} ms`;
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#simpleClipDriveReadout").textContent = value("simpleClipDrive").toFixed(2);
@@ -451,6 +506,7 @@
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
             els.saturationPosition.disabled = !checked("saturationOn");
+            updateAdsrGraph();
         }
 
         function startRepeat() {
@@ -507,6 +563,109 @@
                 track.appendChild(fill);
                 row.append(name, track, value);
                 els.memoryGrid.appendChild(row);
+            });
+        }
+
+        function adsrPoints() {
+            const left = 16;
+            const right = 344;
+            const top = 16;
+            const bottom = 130;
+            const attack = value("attack");
+            const decay = value("ampDecay");
+            const sustain = value("sustain");
+            const release = value("release");
+            const total = attack + decay + release;
+            const width = right - left;
+            const attackX = left + width * (attack / total);
+            const decayX = left + width * ((attack + decay) / total);
+            const sustainY = bottom - (bottom - top) * sustain;
+
+            return {
+                left,
+                right,
+                top,
+                bottom,
+                attackX,
+                decayX,
+                sustainY,
+                points: [
+                    [left, bottom],
+                    [attackX, top],
+                    [decayX, sustainY],
+                    [right, bottom],
+                ],
+            };
+        }
+
+        function updateAdsrGraph() {
+            const graph = adsrPoints();
+            els.adsrLine.setAttribute("points", graph.points.map((point) => point.join(",")).join(" "));
+            els.adsrAttackHandle.setAttribute("cx", graph.attackX);
+            els.adsrAttackHandle.setAttribute("cy", graph.top);
+            els.adsrDecayHandle.setAttribute("cx", graph.decayX);
+            els.adsrDecayHandle.setAttribute("cy", graph.sustainY);
+            els.adsrReleaseHandle.setAttribute("cx", graph.right);
+            els.adsrReleaseHandle.setAttribute("cy", graph.bottom);
+        }
+
+        function setControl(id, nextValue) {
+            const control = controls[id];
+            const min = Number(control.min);
+            const max = Number(control.max);
+            const step = Number(control.step || 0.001);
+            const snapped = Math.round(nextValue / step) * step;
+            control.value = String(clamp(snapped, min, max));
+        }
+
+        function graphPoint(event) {
+            const rect = els.adsrGraph.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 360;
+            const y = ((event.clientY - rect.top) / rect.height) * 150;
+            return { x: clamp(x, 16, 344), y: clamp(y, 16, 130) };
+        }
+
+        function updateFromAdsrDrag(handle, event, target) {
+            const point = graphPoint(event);
+            const graph = adsrPoints();
+            const total = value("attack") + value("ampDecay") + value("release");
+            const t = (point.x - graph.left) / (graph.right - graph.left);
+
+            if(handle === "attack") {
+                setControl("attack", total * clamp(t, 0.01, 0.6));
+            } else if(handle === "decay") {
+                const attack = value("attack");
+                setControl("ampDecay", Math.max(0.02, total * t - attack));
+                setControl("sustain", 1 - ((point.y - graph.top) / (graph.bottom - graph.top)));
+            } else if(handle === "release") {
+                const rect = els.adsrGraph.getBoundingClientRect();
+                const startX = Number(target.dataset.startX || event.clientX);
+                const startRelease = Number(target.dataset.startRelease || value("release"));
+                const secondsPerGraphWidth = 1.2;
+                const delta = ((event.clientX - startX) / rect.width) * secondsPerGraphWidth;
+                setControl("release", startRelease + delta);
+            }
+
+            updateReadouts();
+            updateFirmwareValues();
+            saveSettings();
+        }
+
+        function setupAdsrDrag(handle, name) {
+            handle.addEventListener("pointerdown", (event) => {
+                event.preventDefault();
+                if(name === "release") {
+                    handle.dataset.startX = String(event.clientX);
+                    handle.dataset.startRelease = String(value("release"));
+                }
+                handle.setPointerCapture(event.pointerId);
+                updateFromAdsrDrag(name, event, handle);
+            });
+
+            handle.addEventListener("pointermove", (event) => {
+                if(handle.hasPointerCapture(event.pointerId)) {
+                    updateFromAdsrDrag(name, event, handle);
+                }
             });
         }
 
@@ -573,18 +732,32 @@
 
         function renderKickBuffer(audio, settings) {
             const sampleRate = audio.sampleRate;
-            const length = Math.ceil((settings.ampDecay + 0.08) * sampleRate);
+            const length = Math.ceil((settings.attack + settings.ampDecay + settings.release + 0.02) * sampleRate);
             const buffer = audio.createBuffer(1, length, sampleRate);
             const data = buffer.getChannelData(0);
             const svf = makeSvf(sampleRate, settings.cutoff, settings.resonance);
-            const ampDecay = Math.exp(-1 / (settings.ampDecay * sampleRate));
             const pitchDecay = Math.exp(-1 / (settings.pitchDecay * sampleRate));
+            const attackSamples = Math.max(1, Math.round(settings.attack * sampleRate));
+            const decaySamples = Math.max(1, Math.round(settings.ampDecay * sampleRate));
+            const releaseSamples = Math.max(1, Math.round(settings.release * sampleRate));
+            const decayEnd = attackSamples + decaySamples;
+            const releaseEnd = decayEnd + releaseSamples;
 
-            let ampEnv = 1;
             let pitchEnv = 1;
             let phase = 0;
 
             for(let i = 0; i < length; i++) {
+                let ampEnv = 0;
+                if(i < attackSamples) {
+                    ampEnv = i / attackSamples;
+                } else if(i < decayEnd) {
+                    const t = (i - attackSamples) / decaySamples;
+                    ampEnv = 1 + (settings.sustain - 1) * t;
+                } else if(i < releaseEnd) {
+                    const t = (i - decayEnd) / releaseSamples;
+                    ampEnv = settings.sustain * (1 - t);
+                }
+
                 const freq = settings.baseFreq + settings.pitchAmount * pitchEnv;
                 phase += freq / sampleRate;
                 phase -= Math.floor(phase);
@@ -598,7 +771,6 @@
                 }
 
                 data[i] = sig * settings.gain;
-                ampEnv *= ampDecay;
                 pitchEnv *= pitchDecay;
             }
 
@@ -689,6 +861,10 @@
 
         controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
         controls.bpmNumber.addEventListener("input", () => setBpm(value("bpmNumber")));
+
+        setupAdsrDrag(els.adsrAttackHandle, "attack");
+        setupAdsrDrag(els.adsrDecayHandle, "decay");
+        setupAdsrDrag(els.adsrReleaseHandle, "release");
 
         els.trigger.addEventListener("click", triggerKick);
         els.repeat.addEventListener("click", toggleRepeat);
