@@ -173,6 +173,29 @@
             max-width: 420px;
         }
 
+        .firmware-output {
+            display: grid;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .firmware-output textarea {
+            width: 100%;
+            min-height: 188px;
+            resize: vertical;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: #fbfcfb;
+            color: var(--text);
+            padding: 12px;
+            font: 13px/1.45 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+        }
+
+        .firmware-note {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
         .vu {
             margin-top: 20px;
             display: grid;
@@ -393,6 +416,7 @@
                 <button class="primary" id="trigger">Trigger</button>
                 <button class="secondary" id="repeat">Repeat</button>
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
+                <button class="secondary" id="printValues">Print Firmware Values</button>
                 <button class="danger" id="stop">Stop</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
@@ -400,6 +424,11 @@
             <div class="tempo-control" aria-label="Manual BPM control">
                 <input id="bpm" type="range" min="30" max="300" step="1" value="80">
                 <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
+            </div>
+
+            <div class="firmware-output" aria-label="Firmware values">
+                <textarea id="firmwareValues" spellcheck="false" readonly></textarea>
+                <div class="firmware-note">These are the constants to put in src/main.cpp before building and flashing the Daisy Seed.</div>
             </div>
 
             <div class="vu" aria-label="Output VU meter">
@@ -426,6 +455,8 @@
 
     <script src="memory-report.js"></script>
     <script>
+        const STORAGE_KEY = "kicki-danielsson-preview-v1";
+
         const state = {
             audio: null,
             master: null,
@@ -455,8 +486,10 @@
             trigger: document.querySelector("#trigger"),
             repeat: document.querySelector("#repeat"),
             tapTempo: document.querySelector("#tapTempo"),
+            printValues: document.querySelector("#printValues"),
             stop: document.querySelector("#stop"),
             tempoReadout: document.querySelector("#tempoReadout"),
+            firmwareValues: document.querySelector("#firmwareValues"),
             vuFill: document.querySelector("#vuFill"),
             vuPeak: document.querySelector("#vuPeak"),
             vuReadout: document.querySelector("#vuReadout"),
@@ -529,6 +562,23 @@
             return Math.round(60000 / state.repeatMs);
         }
 
+        function currentSettings() {
+            return {
+                baseFreq: value("baseFreq"),
+                pitchAmount: value("pitchAmount"),
+                pitchDecay: value("pitchDecay"),
+                ampDecay: value("ampDecay"),
+                cutoff: value("cutoff"),
+                resonance: value("resonance"),
+                gain: value("gain"),
+                bpm: bpmFromRepeatMs(),
+            };
+        }
+
+        function saveSettings() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSettings()));
+        }
+
         function setBpm(bpm, shouldRestart = true, preserveTapHistory = false) {
             const clamped = clamp(Math.round(bpm), 30, 300);
             state.repeatMs = 60000 / clamped;
@@ -544,6 +594,67 @@
             }
 
             updateReadouts();
+            updateFirmwareValues();
+            saveSettings();
+        }
+
+        function loadSettings() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if(!stored) {
+                return;
+            }
+
+            try {
+                const settings = JSON.parse(stored);
+                const mappings = {
+                    baseFreq: "baseFreq",
+                    pitchAmount: "pitchAmount",
+                    pitchDecay: "pitchDecay",
+                    ampDecay: "ampDecay",
+                    cutoff: "cutoff",
+                    resonance: "resonance",
+                    gain: "gain",
+                };
+
+                Object.entries(mappings).forEach(([key, control]) => {
+                    if(typeof settings[key] === "number") {
+                        controls[control].value = String(settings[key]);
+                    }
+                });
+
+                if(typeof settings.bpm === "number") {
+                    setBpm(settings.bpm, false, true);
+                }
+            } catch(error) {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+
+        function firmwareValueText() {
+            const settings = currentSettings();
+            const repeatSec = 60 / settings.bpm;
+
+            return [
+                "constexpr float kBaseFreqHz       = " + settings.baseFreq.toFixed(1) + "f;",
+                "constexpr float kPitchAmountHz    = " + settings.pitchAmount.toFixed(1) + "f;",
+                "constexpr float kPitchDecaySec    = " + settings.pitchDecay.toFixed(3) + "f;",
+                "constexpr float kAmpDecaySec      = " + settings.ampDecay.toFixed(3) + "f;",
+                "constexpr float kLowpassCutoffHz  = " + settings.cutoff.toFixed(1) + "f;",
+                "constexpr float kResonance        = " + settings.resonance.toFixed(2) + "f;",
+                "constexpr float kOutputGain       = " + settings.gain.toFixed(2) + "f;",
+                "constexpr float kRepeatTimeSec    = " + repeatSec.toFixed(3) + "f;",
+            ].join("\n");
+        }
+
+        function updateFirmwareValues() {
+            els.firmwareValues.value = firmwareValueText();
+        }
+
+        function printFirmwareValues() {
+            updateFirmwareValues();
+            els.firmwareValues.focus();
+            els.firmwareValues.select();
+            els.status.textContent = "Firmware values printed";
         }
 
         function updateReadouts() {
@@ -699,7 +810,11 @@
         }
 
         Object.values(controls).forEach((control) => {
-            control.addEventListener("input", updateReadouts);
+            control.addEventListener("input", () => {
+                updateReadouts();
+                updateFirmwareValues();
+                saveSettings();
+            });
         });
 
         controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
@@ -708,9 +823,12 @@
         els.trigger.addEventListener("click", triggerKick);
         els.repeat.addEventListener("click", toggleRepeat);
         els.tapTempo.addEventListener("click", tapTempo);
+        els.printValues.addEventListener("click", printFirmwareValues);
         els.stop.addEventListener("click", stopRepeat);
 
+        loadSettings();
         updateReadouts();
+        updateFirmwareValues();
         renderMemoryReport();
     </script>
 </body>

@@ -187,8 +187,16 @@ The preview lets you:
 - Change output gain.
 - Watch the real browser output VU meter.
 - Watch the latest Daisy Seed memory usage from `preview/memory-report.js`.
+- Print the current settings as C++ firmware constants.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
+
+The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/main.cpp`. After copying those values into the firmware, run:
+
+```bash
+python tools/update_memory_report.py
+make program-dfu
+```
 
 After firmware changes, refresh the memory report with:
 
