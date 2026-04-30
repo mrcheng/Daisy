@@ -108,6 +108,7 @@
         .actions {
             display: flex;
             flex-wrap: wrap;
+            align-items: center;
             gap: 10px;
             margin-top: 20px;
         }
@@ -144,6 +145,12 @@
             background: #fff;
             border-color: #e1bbb8;
             color: var(--warn);
+        }
+
+        .tempo-readout {
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+            min-width: 132px;
         }
 
         .vu {
@@ -354,7 +361,9 @@
             <div class="actions">
                 <button class="primary" id="trigger">Trigger</button>
                 <button class="secondary" id="repeat">Repeat</button>
+                <button class="secondary" id="tapTempo">Tap Tempo</button>
                 <button class="danger" id="stop">Stop</button>
+                <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
 
             <div class="vu" aria-label="Output VU meter">
@@ -388,6 +397,8 @@
             meterData: null,
             vuLevel: 0,
             repeatTimer: null,
+            repeatMs: 750,
+            tapTimes: [],
         };
 
         const controls = {
@@ -404,7 +415,9 @@
             status: document.querySelector("#status"),
             trigger: document.querySelector("#trigger"),
             repeat: document.querySelector("#repeat"),
+            tapTempo: document.querySelector("#tapTempo"),
             stop: document.querySelector("#stop"),
+            tempoReadout: document.querySelector("#tempoReadout"),
             vuFill: document.querySelector("#vuFill"),
             vuPeak: document.querySelector("#vuPeak"),
             vuReadout: document.querySelector("#vuReadout"),
@@ -477,6 +490,22 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
+            els.tempoReadout.textContent = `${Math.round(60000 / state.repeatMs)} BPM`;
+        }
+
+        function startRepeat() {
+            triggerKick();
+            state.repeatTimer = setInterval(triggerKick, state.repeatMs);
+            els.repeat.textContent = "Repeating";
+        }
+
+        function restartRepeatIfRunning() {
+            if(!state.repeatTimer) {
+                return;
+            }
+
+            clearInterval(state.repeatTimer);
+            state.repeatTimer = setInterval(triggerKick, state.repeatMs);
         }
 
         function renderMemoryReport() {
@@ -568,9 +597,7 @@
                 return;
             }
 
-            triggerKick();
-            state.repeatTimer = setInterval(triggerKick, 750);
-            els.repeat.textContent = "Repeating";
+            startRepeat();
         }
 
         function stopRepeat() {
@@ -582,12 +609,40 @@
             els.status.textContent = "Ready";
         }
 
+        function tapTempo() {
+            const now = performance.now();
+            const lastTap = state.tapTimes[state.tapTimes.length - 1];
+
+            if(lastTap && now - lastTap > 2200) {
+                state.tapTimes = [];
+            }
+
+            state.tapTimes.push(now);
+            state.tapTimes = state.tapTimes.slice(-5);
+
+            if(state.tapTimes.length >= 2) {
+                const intervals = [];
+                for(let i = 1; i < state.tapTimes.length; i++) {
+                    intervals.push(state.tapTimes[i] - state.tapTimes[i - 1]);
+                }
+
+                const average = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+                state.repeatMs = Math.max(200, Math.min(2000, average));
+                restartRepeatIfRunning();
+                updateReadouts();
+            }
+
+            triggerKick();
+            els.status.textContent = `Tap tempo ${Math.round(60000 / state.repeatMs)} BPM`;
+        }
+
         Object.values(controls).forEach((control) => {
             control.addEventListener("input", updateReadouts);
         });
 
         els.trigger.addEventListener("click", triggerKick);
         els.repeat.addEventListener("click", toggleRepeat);
+        els.tapTempo.addEventListener("click", tapTempo);
         els.stop.addEventListener("click", stopRepeat);
 
         updateReadouts();
