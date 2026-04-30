@@ -164,6 +164,15 @@
             min-width: 132px;
         }
 
+        .tempo-control {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            max-width: 420px;
+        }
+
         .vu {
             margin-top: 20px;
             display: grid;
@@ -300,6 +309,11 @@
                 grid-column: 1 / -1;
                 text-align: left;
             }
+
+            .tempo-control {
+                grid-template-columns: 1fr;
+                max-width: none;
+            }
         }
     </style>
 </head>
@@ -368,13 +382,6 @@
                     </div>
                 </div>
 
-                <div class="control">
-                    <label for="bpm">BPM</label>
-                    <div class="value-row">
-                        <input id="bpm" type="range" min="30" max="300" step="1" value="80">
-                        <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
-                    </div>
-                </div>
             </div>
 
             <div class="actions">
@@ -383,6 +390,11 @@
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
                 <button class="danger" id="stop">Stop</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
+            </div>
+
+            <div class="tempo-control" aria-label="Manual BPM control">
+                <input id="bpm" type="range" min="30" max="300" step="1" value="80">
+                <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
             </div>
 
             <div class="vu" aria-label="Output VU meter">
