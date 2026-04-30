@@ -8,6 +8,8 @@ using namespace daisysp;
 DaisySeed  hw;
 Oscillator osc;
 Svf        lowpass;
+Overdrive  overdrive;
+Wavefolder wavefolder;
 
 constexpr float kBaseFreqHz       = 56.0f;
 constexpr float kPitchAmountHz    = 112.0f;
@@ -15,6 +17,15 @@ constexpr float kPitchDecaySec    = 0.055f;
 constexpr float kAmpDecaySec      = 0.360f;
 constexpr float kLowpassCutoffHz  = 760.0f;
 constexpr float kResonance        = 0.62f;
+constexpr bool  kSimpleClipOn     = false;
+constexpr float kSimpleClipDrive  = 0.25f;
+constexpr bool  kOverdriveOn      = false;
+constexpr float kOverdriveDrive   = 0.35f;
+constexpr bool  kWavefolderOn     = false;
+constexpr float kWavefolderDrive  = 0.20f;
+constexpr bool  kSaturationOn     = false;
+constexpr bool  kSaturationPost   = false;
+constexpr float kSaturationDrive  = 0.35f;
 constexpr float kOutputGain       = 0.70f;
 
 float amp_env;
@@ -29,6 +40,23 @@ static void TriggerKick()
     osc.Reset();
 }
 
+static float Clamp(float x, float lo, float hi)
+{
+    return x < lo ? lo : x > hi ? hi : x;
+}
+
+static float HardClip(float sig, float drive)
+{
+    float driven = sig * (1.0f + drive * 16.0f);
+    return Clamp(driven, -1.0f, 1.0f);
+}
+
+static float Saturate(float sig, float drive)
+{
+    float driven = sig * (1.0f + drive * 20.0f);
+    return driven / (1.0f + fabsf(driven));
+}
+
 static void AudioCallback(AudioHandle::InputBuffer  in,
                           AudioHandle::OutputBuffer out,
                           size_t                    size)
@@ -39,8 +67,23 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
         osc.SetFreq(freq);
 
         float sig = osc.Process() * amp_env;
+
+        if(kSimpleClipOn)
+            sig = HardClip(sig, kSimpleClipDrive);
+        if(kOverdriveOn)
+            sig = overdrive.Process(sig);
+        if(kWavefolderOn)
+            sig = wavefolder.Process(sig);
+        if(kSaturationOn && !kSaturationPost)
+            sig = Saturate(sig, kSaturationDrive);
+
         lowpass.Process(sig);
-        sig = lowpass.Low() * kOutputGain;
+        sig = lowpass.Low();
+
+        if(kSaturationOn && kSaturationPost)
+            sig = Saturate(sig, kSaturationDrive);
+
+        sig *= kOutputGain;
 
         amp_env *= amp_decay;
         pitch_env *= pitch_decay;
@@ -66,6 +109,13 @@ int main(void)
     lowpass.SetFreq(kLowpassCutoffHz);
     lowpass.SetRes(kResonance);
     lowpass.SetDrive(0.3f);
+
+    overdrive.Init();
+    overdrive.SetDrive(kOverdriveDrive);
+
+    wavefolder.Init();
+    wavefolder.SetGain(1.0f + kWavefolderDrive * 8.0f);
+    wavefolder.SetOffset(0.0f);
 
     amp_decay       = expf(-1.0f / (kAmpDecaySec * sample_rate));
     pitch_decay     = expf(-1.0f / (kPitchDecaySec * sample_rate));

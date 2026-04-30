@@ -15,13 +15,22 @@ ALLOWED_NAMES = {
     "kAmpDecaySec",
     "kLowpassCutoffHz",
     "kResonance",
+    "kSimpleClipOn",
+    "kSimpleClipDrive",
+    "kOverdriveOn",
+    "kOverdriveDrive",
+    "kWavefolderOn",
+    "kWavefolderDrive",
+    "kSaturationOn",
+    "kSaturationPost",
+    "kSaturationDrive",
     "kOutputGain",
 }
 
 CONSTANT_RE = re.compile(
-    r"^\s*constexpr\s+float\s+"
+    r"^\s*constexpr\s+(?P<type>float|bool)\s+"
     r"(?P<name>k[A-Za-z0-9_]+)\s*=\s*"
-    r"(?P<value>[0-9]+(?:\.[0-9]+)?f?)\s*;\s*$"
+    r"(?P<value>true|false|[0-9]+(?:\.[0-9]+)?f?)\s*;\s*$"
 )
 
 
@@ -49,7 +58,7 @@ def parse_constants(text):
         name = match.group("name")
         if name in ALLOWED_NAMES:
             value = match.group("value")
-            constants[name] = value if value.endswith("f") else value + "f"
+            constants[name] = value if match.group("type") == "bool" or value.endswith("f") else value + "f"
 
     missing = sorted(ALLOWED_NAMES - constants.keys())
     if missing:
@@ -70,9 +79,9 @@ def apply_constants(constants):
         return f"{prefix}{constants[name]};"
 
     pattern = re.compile(
-        r"^(?P<prefix>\s*constexpr\s+float\s+"
+        r"^(?P<prefix>\s*constexpr\s+(?:float|bool)\s+"
         r"(?P<name>k[A-Za-z0-9_]+)\s*=\s*)"
-        r"[0-9]+(?:\.[0-9]+)?f?\s*;",
+        r"(?:true|false|[0-9]+(?:\.[0-9]+)?f?)\s*;",
         re.MULTILINE,
     )
 

@@ -184,6 +184,7 @@ The preview lets you:
 - Change pitch drop and pitch decay.
 - Change body decay.
 - Change lowpass cutoff and resonance.
+- Enable simple clipping, DaisySP Overdrive, wavefolder, and saturation.
 - Change output gain.
 - Watch the real browser output VU meter.
 - Watch the latest Daisy Seed memory usage from `preview/kicki/memory-report.js`.

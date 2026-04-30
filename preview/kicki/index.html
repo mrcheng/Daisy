@@ -66,6 +66,57 @@
             </div>
 
             <div class="section-heading">Good Vibrations</div>
+            <div class="grid">
+                <div class="control effect-control">
+                    <label class="toggle-label" for="simpleClipOn">
+                        <input id="simpleClipOn" type="checkbox">
+                        Simple clipping
+                    </label>
+                    <div class="value-row">
+                        <input id="simpleClipDrive" type="range" min="0" max="1" step="0.01" value="0.25">
+                        <span class="readout" id="simpleClipDriveReadout">0.25</span>
+                    </div>
+                </div>
+
+                <div class="control effect-control">
+                    <label class="toggle-label" for="overdriveOn">
+                        <input id="overdriveOn" type="checkbox">
+                        DaisySP Overdrive
+                    </label>
+                    <div class="value-row">
+                        <input id="overdriveDrive" type="range" min="0" max="1" step="0.01" value="0.35">
+                        <span class="readout" id="overdriveDriveReadout">0.35</span>
+                    </div>
+                </div>
+
+                <div class="control effect-control">
+                    <label class="toggle-label" for="wavefolderOn">
+                        <input id="wavefolderOn" type="checkbox">
+                        Wavefolder
+                    </label>
+                    <div class="value-row">
+                        <input id="wavefolderDrive" type="range" min="0" max="1" step="0.01" value="0.20">
+                        <span class="readout" id="wavefolderDriveReadout">0.20</span>
+                    </div>
+                </div>
+
+                <div class="control effect-control">
+                    <label class="toggle-label" for="saturationOn">
+                        <input id="saturationOn" type="checkbox">
+                        Saturation
+                    </label>
+                    <div class="value-row">
+                        <input id="saturationDrive" type="range" min="0" max="1" step="0.01" value="0.35">
+                        <span class="readout" id="saturationDriveReadout">0.35</span>
+                    </div>
+                    <select id="saturationPosition">
+                        <option value="pre" selected>Before lowpass</option>
+                        <option value="post">After lowpass</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-heading">Master</div>
             <div class="grid compact-grid">
                 <div class="control">
                     <label for="gain">Output gain</label>
@@ -144,9 +195,20 @@
             ampDecay: document.querySelector("#ampDecay"),
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
+            simpleClipDrive: document.querySelector("#simpleClipDrive"),
+            overdriveDrive: document.querySelector("#overdriveDrive"),
+            wavefolderDrive: document.querySelector("#wavefolderDrive"),
+            saturationDrive: document.querySelector("#saturationDrive"),
             gain: document.querySelector("#gain"),
             bpm: document.querySelector("#bpm"),
             bpmNumber: document.querySelector("#bpmNumber"),
+        };
+
+        const toggles = {
+            simpleClipOn: document.querySelector("#simpleClipOn"),
+            overdriveOn: document.querySelector("#overdriveOn"),
+            wavefolderOn: document.querySelector("#wavefolderOn"),
+            saturationOn: document.querySelector("#saturationOn"),
         };
 
         const els = {
@@ -164,6 +226,7 @@
             vuReadout: document.querySelector("#vuReadout"),
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
+            saturationPosition: document.querySelector("#saturationPosition"),
         };
 
         function getAudio() {
@@ -223,6 +286,10 @@
             return Number(controls[id].value);
         }
 
+        function checked(id) {
+            return toggles[id].checked;
+        }
+
         function clamp(valueToClamp, min, max) {
             return Math.max(min, Math.min(max, valueToClamp));
         }
@@ -239,6 +306,15 @@
                 ampDecay: value("ampDecay"),
                 cutoff: value("cutoff"),
                 resonance: value("resonance"),
+                simpleClipOn: checked("simpleClipOn"),
+                simpleClipDrive: value("simpleClipDrive"),
+                overdriveOn: checked("overdriveOn"),
+                overdriveDrive: value("overdriveDrive"),
+                wavefolderOn: checked("wavefolderOn"),
+                wavefolderDrive: value("wavefolderDrive"),
+                saturationOn: checked("saturationOn"),
+                saturationPost: els.saturationPosition.value === "post",
+                saturationDrive: value("saturationDrive"),
                 gain: value("gain"),
                 bpm: bpmFromRepeatMs(),
             };
@@ -282,6 +358,10 @@
                     ampDecay: "ampDecay",
                     cutoff: "cutoff",
                     resonance: "resonance",
+                    simpleClipDrive: "simpleClipDrive",
+                    overdriveDrive: "overdriveDrive",
+                    wavefolderDrive: "wavefolderDrive",
+                    saturationDrive: "saturationDrive",
                     gain: "gain",
                 };
 
@@ -293,6 +373,16 @@
 
                 if(typeof settings.bpm === "number") {
                     setBpm(settings.bpm, false, true);
+                }
+
+                Object.keys(toggles).forEach((key) => {
+                    if(typeof settings[key] === "boolean") {
+                        toggles[key].checked = settings[key];
+                    }
+                });
+
+                if(typeof settings.saturationPost === "boolean") {
+                    els.saturationPosition.value = settings.saturationPost ? "post" : "pre";
                 }
             } catch(error) {
                 localStorage.removeItem(STORAGE_KEY);
@@ -309,6 +399,15 @@
                 "constexpr float kAmpDecaySec      = " + settings.ampDecay.toFixed(3) + "f;",
                 "constexpr float kLowpassCutoffHz  = " + settings.cutoff.toFixed(1) + "f;",
                 "constexpr float kResonance        = " + settings.resonance.toFixed(2) + "f;",
+                "constexpr bool  kSimpleClipOn     = " + String(settings.simpleClipOn) + ";",
+                "constexpr float kSimpleClipDrive  = " + settings.simpleClipDrive.toFixed(2) + "f;",
+                "constexpr bool  kOverdriveOn      = " + String(settings.overdriveOn) + ";",
+                "constexpr float kOverdriveDrive   = " + settings.overdriveDrive.toFixed(2) + "f;",
+                "constexpr bool  kWavefolderOn     = " + String(settings.wavefolderOn) + ";",
+                "constexpr float kWavefolderDrive  = " + settings.wavefolderDrive.toFixed(2) + "f;",
+                "constexpr bool  kSaturationOn     = " + String(settings.saturationOn) + ";",
+                "constexpr bool  kSaturationPost   = " + String(settings.saturationPost) + ";",
+                "constexpr float kSaturationDrive  = " + settings.saturationDrive.toFixed(2) + "f;",
                 "constexpr float kOutputGain       = " + settings.gain.toFixed(2) + "f;",
             ].join("\n");
         }
@@ -344,6 +443,10 @@
             document.querySelector("#ampDecayReadout").textContent = `${Math.round(value("ampDecay") * 1000)} ms`;
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
+            document.querySelector("#simpleClipDriveReadout").textContent = value("simpleClipDrive").toFixed(2);
+            document.querySelector("#overdriveDriveReadout").textContent = value("overdriveDrive").toFixed(2);
+            document.querySelector("#wavefolderDriveReadout").textContent = value("wavefolderDrive").toFixed(2);
+            document.querySelector("#saturationDriveReadout").textContent = value("saturationDrive").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
         }
@@ -405,6 +508,63 @@
             });
         }
 
+        function makeDistortionCurve(amount, mode) {
+            const samples = 2048;
+            const curve = new Float32Array(samples);
+            const drive = 1 + amount * (mode === "clip" ? 16 : 20);
+
+            for(let i = 0; i < samples; i++) {
+                const x = i * 2 / (samples - 1) - 1;
+                const driven = x * drive;
+
+                if(mode === "clip") {
+                    curve[i] = Math.max(-1, Math.min(1, driven));
+                } else if(mode === "fold") {
+                    curve[i] = Math.sin(driven * Math.PI * 0.5);
+                } else {
+                    curve[i] = driven / (1 + Math.abs(driven));
+                }
+            }
+
+            return curve;
+        }
+
+        function addDistortion(audio, input, output, settings, postFilter = false) {
+            let node = input;
+
+            if(!postFilter) {
+                if(settings.simpleClipOn) {
+                    const clip = audio.createWaveShaper();
+                    clip.curve = makeDistortionCurve(settings.simpleClipDrive, "clip");
+                    node.connect(clip);
+                    node = clip;
+                }
+
+                if(settings.overdriveOn) {
+                    const drive = audio.createWaveShaper();
+                    drive.curve = makeDistortionCurve(settings.overdriveDrive, "saturate");
+                    node.connect(drive);
+                    node = drive;
+                }
+
+                if(settings.wavefolderOn) {
+                    const fold = audio.createWaveShaper();
+                    fold.curve = makeDistortionCurve(settings.wavefolderDrive, "fold");
+                    node.connect(fold);
+                    node = fold;
+                }
+            }
+
+            if(settings.saturationOn && settings.saturationPost === postFilter) {
+                const saturation = audio.createWaveShaper();
+                saturation.curve = makeDistortionCurve(settings.saturationDrive, "saturate");
+                node.connect(saturation);
+                node = saturation;
+            }
+
+            node.connect(output);
+        }
+
         async function triggerKick() {
             const audio = getAudio();
             await audio.resume();
@@ -416,6 +576,7 @@
             const ampDecay = value("ampDecay");
             const gain = value("gain");
             const resonance = value("resonance");
+            const settings = currentSettings();
 
             const osc = audio.createOscillator();
             const filter = audio.createBiquadFilter();
@@ -433,8 +594,8 @@
             amp.gain.linearRampToValueAtTime(gain, now + 0.002);
             amp.gain.exponentialRampToValueAtTime(0.0001, now + ampDecay);
 
-            osc.connect(filter);
-            filter.connect(amp);
+            addDistortion(audio, osc, filter, settings, false);
+            addDistortion(audio, filter, amp, settings, true);
             amp.connect(state.master);
 
             osc.start(now);
@@ -495,6 +656,18 @@
                 updateFirmwareValues();
                 saveSettings();
             });
+        });
+
+        Object.values(toggles).forEach((toggle) => {
+            toggle.addEventListener("change", () => {
+                updateFirmwareValues();
+                saveSettings();
+            });
+        });
+
+        els.saturationPosition.addEventListener("change", () => {
+            updateFirmwareValues();
+            saveSettings();
         });
 
         controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
