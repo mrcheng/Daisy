@@ -450,6 +450,7 @@
             document.querySelector("#saturationDriveReadout").textContent = value("saturationDrive").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
+            els.saturationPosition.disabled = !checked("saturationOn");
         }
 
         function startRepeat() {
