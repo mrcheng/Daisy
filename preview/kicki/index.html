@@ -662,6 +662,7 @@
 
         Object.values(toggles).forEach((toggle) => {
             toggle.addEventListener("change", () => {
+                updateReadouts();
                 updateFirmwareValues();
                 saveSettings();
             });
