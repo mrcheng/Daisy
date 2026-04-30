@@ -6,7 +6,7 @@ import sys
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-MAIN_CPP = ROOT / "src" / "main.cpp"
+KICKI_CPP = ROOT / "src" / "kicki.cpp"
 
 ALLOWED_NAMES = {
     "kBaseFreqHz",
@@ -60,7 +60,7 @@ def parse_constants(text):
 
 
 def apply_constants(constants):
-    source = MAIN_CPP.read_text(encoding="utf-8")
+    source = KICKI_CPP.read_text(encoding="utf-8")
 
     def replace(match):
         name = match.group("name")
@@ -79,16 +79,16 @@ def apply_constants(constants):
 
     updated = pattern.sub(replace, source)
     if updated == source:
-        raise RuntimeError("No constants were changed in src/main.cpp.")
+        raise RuntimeError("No constants were changed in src/kicki.cpp.")
 
-    MAIN_CPP.write_text(updated, encoding="utf-8")
+    KICKI_CPP.write_text(updated, encoding="utf-8")
 
 
 def main():
     constants = parse_constants(read_clipboard())
     apply_constants(constants)
 
-    print("Updated src/main.cpp with copied firmware values:")
+    print("Updated src/kicki.cpp with copied firmware values:")
     for name in sorted(constants):
         print(f"  {name} = {constants[name]}")
 

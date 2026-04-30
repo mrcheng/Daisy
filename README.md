@@ -8,8 +8,8 @@ The firmware uses libDaisy and DaisySP to make a simple kick drum with a sine os
 
 ```text
 .
-|-- src/main.cpp       # Kicki Danielsson firmware
-|-- preview/index.html # Browser bassdrum preview
+|-- src/kicki.cpp            # Kicki Danielsson firmware
+|-- preview/kicki/index.html # Browser bassdrum preview
 |-- Makefile          # Build/flash entry point
 |-- libDaisy          # Electro-Smith library submodule
 |-- DaisySP           # Electro-Smith DSP library submodule
@@ -165,13 +165,13 @@ The Daisy firmware cannot run directly on the PC. For quick sound-design work be
 Open:
 
 ```text
-preview/index.html
+preview/kicki/index.html
 ```
 
 Or from the repo root on Windows:
 
 ```powershell
-start preview/index.html
+start preview/kicki/index.html
 ```
 
 The preview lets you:
@@ -186,12 +186,12 @@ The preview lets you:
 - Change lowpass cutoff and resonance.
 - Change output gain.
 - Watch the real browser output VU meter.
-- Watch the latest Daisy Seed memory usage from `preview/memory-report.js`.
+- Watch the latest Daisy Seed memory usage from `preview/kicki/memory-report.js`.
 - Print the current settings as C++ firmware constants.
 
-Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
+Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/kicki.cpp`, build with `make`, and flash with `make program-dfu`.
 
-The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/main.cpp`.
+The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/kicki.cpp`.
 
 For the fastest path:
 
@@ -217,7 +217,7 @@ python tools/update_memory_report.py
 
 ## Editing The Synth
 
-The firmware is in `src/main.cpp`.
+The firmware is in `src/kicki.cpp`.
 
 Change the final body pitch here:
 

@@ -9,7 +9,7 @@ import sys
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-OUT = ROOT / "preview" / "memory-report.js"
+OUT = ROOT / "preview" / "kicki" / "memory-report.js"
 
 
 MEMORY_RE = re.compile(

@@ -5,7 +5,7 @@ TARGET = KickiDanielsson
 .DEFAULT_GOAL := all
 
 # Sources
-CPP_SOURCES = src/main.cpp
+CPP_SOURCES = src/kicki.cpp
 
 # Library Locations
 LIBDAISY_DIR = libDaisy

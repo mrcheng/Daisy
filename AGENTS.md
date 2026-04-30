@@ -5,7 +5,7 @@ This repo is a Daisy Seed C++ firmware project for the Kicki Danielsson bassdrum
 ## Project Shape
 
 - Target hardware: Electro-Smith Daisy Seed.
-- Main firmware source: `src/main.cpp`.
+- Main firmware source: `src/kicki.cpp`.
 - Build entry point: `Makefile`.
 - Dependencies are git submodules:
   - `libDaisy`
