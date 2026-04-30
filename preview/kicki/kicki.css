@@ -57,6 +57,24 @@ h1 {
     box-shadow: 0 8px 24px rgba(18, 24, 31, 0.08);
 }
 
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.section-heading::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: var(--line);
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
