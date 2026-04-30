@@ -417,6 +417,7 @@
                 <button class="secondary" id="repeat">Repeat</button>
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
                 <button class="secondary" id="printValues">Print Firmware Values</button>
+                <button class="secondary" id="copyValues">Copy Values</button>
                 <button class="danger" id="stop">Stop</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
@@ -487,6 +488,7 @@
             repeat: document.querySelector("#repeat"),
             tapTempo: document.querySelector("#tapTempo"),
             printValues: document.querySelector("#printValues"),
+            copyValues: document.querySelector("#copyValues"),
             stop: document.querySelector("#stop"),
             tempoReadout: document.querySelector("#tempoReadout"),
             firmwareValues: document.querySelector("#firmwareValues"),
@@ -657,6 +659,19 @@
             els.status.textContent = "Firmware values printed";
         }
 
+        async function copyFirmwareValues() {
+            updateFirmwareValues();
+
+            try {
+                await navigator.clipboard.writeText(els.firmwareValues.value);
+                els.status.textContent = "Firmware values copied";
+            } catch(error) {
+                els.firmwareValues.focus();
+                els.firmwareValues.select();
+                els.status.textContent = "Select and copy the firmware values";
+            }
+        }
+
         function updateReadouts() {
             document.querySelector("#baseFreqReadout").textContent = `${value("baseFreq").toFixed(0)} Hz`;
             document.querySelector("#pitchAmountReadout").textContent = `${value("pitchAmount").toFixed(0)} Hz`;
@@ -824,6 +839,7 @@
         els.repeat.addEventListener("click", toggleRepeat);
         els.tapTempo.addEventListener("click", tapTempo);
         els.printValues.addEventListener("click", printFirmwareValues);
+        els.copyValues.addEventListener("click", copyFirmwareValues);
         els.stop.addEventListener("click", stopRepeat);
 
         loadSettings();

@@ -64,6 +64,15 @@
             "problemMatcher": [
                 "$gcc"
             ]
+        },
+        {
+            "label": "apply_firmware_values",
+            "type": "shell",
+            "command": "python tools/apply_firmware_values.py",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
         }
     ]
 }

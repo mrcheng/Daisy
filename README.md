@@ -191,7 +191,18 @@ The preview lets you:
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/main.cpp`, build with `make`, and flash with `make program-dfu`.
 
-The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/main.cpp`. After copying those values into the firmware, run:
+The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/main.cpp`.
+
+For the fastest path:
+
+1. Click `Copy Values` in the browser.
+2. Run:
+
+```bash
+python tools/apply_firmware_values.py
+```
+
+3. Build, refresh memory, and flash:
 
 ```bash
 python tools/update_memory_report.py

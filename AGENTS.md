@@ -90,4 +90,10 @@ After firmware changes, refresh the browser memory report:
 python tools/update_memory_report.py
 ```
 
+If the user has copied constants from the browser preview, apply them with:
+
+```bash
+python tools/apply_firmware_values.py
+```
+
 Mention whether flashing was performed. If not, explain that hardware DFU mode is required.

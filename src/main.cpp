@@ -9,14 +9,14 @@ DaisySeed  hw;
 Oscillator osc;
 Svf        lowpass;
 
-constexpr float kBaseFreqHz       = 48.0f;
+constexpr float kBaseFreqHz       = 56.0f;
 constexpr float kPitchAmountHz    = 112.0f;
 constexpr float kPitchDecaySec    = 0.055f;
-constexpr float kAmpDecaySec      = 0.36f;
+constexpr float kAmpDecaySec      = 0.360f;
 constexpr float kLowpassCutoffHz  = 760.0f;
 constexpr float kResonance        = 0.62f;
-constexpr float kOutputGain       = 0.7f;
-constexpr float kRepeatTimeSec    = 0.75f;
+constexpr float kOutputGain       = 0.70f;
+constexpr float kRepeatTimeSec    = 0.750f;
 
 float    amp_env;
 float    pitch_env;
