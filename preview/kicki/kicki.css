@@ -447,6 +447,19 @@ button {
     text-align: right;
 }
 
+.preset-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.preset-actions input[type="file"] {
+    display: none;
+}
+
 @media (max-width: 760px) {
     header {
         align-items: start;

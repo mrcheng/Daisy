@@ -212,6 +212,12 @@
                 <div class="memory-grid" id="memoryGrid"></div>
                 <div class="memory-note">Refresh after firmware changes: python tools/update_memory_report.py</div>
             </div>
+
+            <div class="preset-actions" aria-label="Kicki preset files">
+                <button class="secondary" id="savePreset">Save .kicki</button>
+                <button class="secondary" id="loadPreset">Load .kicki</button>
+                <input id="presetFile" type="file" accept=".kicki,application/json">
+            </div>
         </section>
     </main>
 
@@ -266,6 +272,9 @@
             tapTempo: document.querySelector("#tapTempo"),
             printValues: document.querySelector("#printValues"),
             copyValues: document.querySelector("#copyValues"),
+            savePreset: document.querySelector("#savePreset"),
+            loadPreset: document.querySelector("#loadPreset"),
+            presetFile: document.querySelector("#presetFile"),
             stop: document.querySelector("#stop"),
             tempoReadout: document.querySelector("#tempoReadout"),
             firmwareValues: document.querySelector("#firmwareValues"),
@@ -388,6 +397,54 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSettings()));
         }
 
+        function applySettings(settings, shouldPersist = false) {
+            const mappings = {
+                baseFreq: "baseFreq",
+                pitchAmount: "pitchAmount",
+                pitchDecay: "pitchDecay",
+                attack: "attack",
+                ampDecay: "ampDecay",
+                sustain: "sustain",
+                release: "release",
+                cutoff: "cutoff",
+                resonance: "resonance",
+                masterDist: "masterDist",
+                simpleClipDrive: "simpleClipDrive",
+                overdriveDrive: "overdriveDrive",
+                wavefolderDrive: "wavefolderDrive",
+                saturationDrive: "saturationDrive",
+                gain: "gain",
+            };
+
+            Object.entries(mappings).forEach(([key, control]) => {
+                if(typeof settings[key] === "number") {
+                    setControl(control, settings[key]);
+                }
+            });
+
+            if(typeof settings.bpm === "number") {
+                setBpm(settings.bpm, false, true);
+            }
+
+            Object.keys(toggles).forEach((key) => {
+                if(typeof settings[key] === "boolean") {
+                    toggles[key].checked = settings[key];
+                }
+            });
+
+            if(typeof settings.saturationPost === "boolean") {
+                els.saturationPosition.value = settings.saturationPost ? "post" : "pre";
+            }
+
+            state.distMaster = value("masterDist");
+            updateReadouts();
+            updateFirmwareValues();
+
+            if(shouldPersist) {
+                saveSettings();
+            }
+        }
+
         function setBpm(bpm, shouldRestart = true, preserveTapHistory = false) {
             const clamped = clamp(Math.round(bpm), 30, 300);
             state.repeatMs = 60000 / clamped;
@@ -415,48 +472,51 @@
 
             try {
                 const settings = JSON.parse(stored);
-                const mappings = {
-                    baseFreq: "baseFreq",
-                    pitchAmount: "pitchAmount",
-                    pitchDecay: "pitchDecay",
-                    attack: "attack",
-                    ampDecay: "ampDecay",
-                    sustain: "sustain",
-                    release: "release",
-                    cutoff: "cutoff",
-                    resonance: "resonance",
-                    masterDist: "masterDist",
-                    simpleClipDrive: "simpleClipDrive",
-                    overdriveDrive: "overdriveDrive",
-                    wavefolderDrive: "wavefolderDrive",
-                    saturationDrive: "saturationDrive",
-                    gain: "gain",
-                };
-
-                Object.entries(mappings).forEach(([key, control]) => {
-                    if(typeof settings[key] === "number") {
-                        controls[control].value = String(settings[key]);
-                    }
-                });
-
-                if(typeof settings.bpm === "number") {
-                    setBpm(settings.bpm, false, true);
-                }
-
-                Object.keys(toggles).forEach((key) => {
-                    if(typeof settings[key] === "boolean") {
-                        toggles[key].checked = settings[key];
-                    }
-                });
-
-                if(typeof settings.saturationPost === "boolean") {
-                    els.saturationPosition.value = settings.saturationPost ? "post" : "pre";
-                }
-
-                state.distMaster = value("masterDist");
+                applySettings(settings);
             } catch(error) {
                 localStorage.removeItem(STORAGE_KEY);
             }
+        }
+
+        function savePresetFile() {
+            const preset = {
+                format: "kicki",
+                version: 1,
+                name: "Kicki Danielsson",
+                savedAt: new Date().toISOString(),
+                settings: currentSettings(),
+            };
+            const blob = new Blob([JSON.stringify(preset, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = "KickiDanielsson.kicki";
+            link.click();
+            URL.revokeObjectURL(url);
+            els.status.textContent = "Saved .kicki preset";
+        }
+
+        async function loadPresetFile(file) {
+            if(!file) {
+                return;
+            }
+
+            try {
+                const preset = JSON.parse(await file.text());
+                const settings = preset.settings || preset;
+
+                if(preset.format && preset.format !== "kicki") {
+                    throw new Error("Unsupported preset format");
+                }
+
+                applySettings(settings, true);
+                els.status.textContent = `Loaded ${file.name}`;
+            } catch(error) {
+                els.status.textContent = "Could not load .kicki preset";
+            }
+
+            els.presetFile.value = "";
         }
 
         function firmwareValueText() {
@@ -959,6 +1019,9 @@
         els.tapTempo.addEventListener("click", tapTempo);
         els.printValues.addEventListener("click", printFirmwareValues);
         els.copyValues.addEventListener("click", copyFirmwareValues);
+        els.savePreset.addEventListener("click", savePresetFile);
+        els.loadPreset.addEventListener("click", () => els.presetFile.click());
+        els.presetFile.addEventListener("change", () => loadPresetFile(els.presetFile.files[0]));
         els.stop.addEventListener("click", stopRepeat);
 
         loadSettings();
