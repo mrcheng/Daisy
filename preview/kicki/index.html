@@ -510,61 +510,99 @@
             });
         }
 
-        function makeDistortionCurve(amount, mode) {
-            const samples = 2048;
-            const curve = new Float32Array(samples);
-            const drive = 1 + amount * (mode === "clip" ? 16 : 20);
-
-            for(let i = 0; i < samples; i++) {
-                const x = i * 2 / (samples - 1) - 1;
-                const driven = x * drive;
-
-                if(mode === "clip") {
-                    curve[i] = Math.max(-1, Math.min(1, driven));
-                } else if(mode === "fold") {
-                    curve[i] = Math.sin(driven * Math.PI * 0.5);
-                } else {
-                    curve[i] = driven / (1 + Math.abs(driven));
-                }
-            }
-
-            return curve;
+        function hardClip(sig, drive) {
+            const driven = sig * (1 + drive * 16);
+            return Math.max(-1, Math.min(1, driven));
         }
 
-        function addDistortion(audio, input, output, settings, postFilter = false) {
-            let node = input;
+        function saturate(sig, drive) {
+            const driven = sig * (1 + drive * 20);
+            return driven / (1 + Math.abs(driven));
+        }
 
-            if(!postFilter) {
-                if(settings.simpleClipOn) {
-                    const clip = audio.createWaveShaper();
-                    clip.curve = makeDistortionCurve(settings.simpleClipDrive, "clip");
-                    node.connect(clip);
-                    node = clip;
-                }
+        function fold(sig, drive) {
+            return Math.sin(sig * (1 + drive * 8) * Math.PI * 0.5);
+        }
 
-                if(settings.overdriveOn) {
-                    const drive = audio.createWaveShaper();
-                    drive.curve = makeDistortionCurve(settings.overdriveDrive, "saturate");
-                    node.connect(drive);
-                    node = drive;
-                }
-
-                if(settings.wavefolderOn) {
-                    const fold = audio.createWaveShaper();
-                    fold.curve = makeDistortionCurve(settings.wavefolderDrive, "fold");
-                    node.connect(fold);
-                    node = fold;
-                }
+        function applyPreFilterDistortion(sig, settings) {
+            if(settings.simpleClipOn) {
+                sig = hardClip(sig, settings.simpleClipDrive);
+            }
+            if(settings.overdriveOn) {
+                sig = saturate(sig, settings.overdriveDrive);
+            }
+            if(settings.wavefolderOn) {
+                sig = fold(sig, settings.wavefolderDrive);
+            }
+            if(settings.saturationOn && !settings.saturationPost) {
+                sig = saturate(sig, settings.saturationDrive);
             }
 
-            if(settings.saturationOn && settings.saturationPost === postFilter) {
-                const saturation = audio.createWaveShaper();
-                saturation.curve = makeDistortionCurve(settings.saturationDrive, "saturate");
-                node.connect(saturation);
-                node = saturation;
+            return sig;
+        }
+
+        function makeSvf(sampleRate, cutoff, resonance) {
+            const fcMax = sampleRate / 3;
+            const fc = Math.max(1.0e-6, Math.min(fcMax, cutoff));
+            const res = Math.max(0, Math.min(1, resonance));
+            const freq = 2 * Math.sin(Math.PI * Math.min(0.25, fc / (sampleRate * 2)));
+            const damp = Math.min(
+                2 * (1 - Math.pow(res, 0.25)),
+                Math.min(2, 2 / freq - freq * 0.5)
+            );
+
+            let low = 0;
+            let high = 0;
+            let band = 0;
+            const drive = 0.03 * res;
+
+            return {
+                process(input) {
+                    let outLow = 0;
+                    for(let pass = 0; pass < 2; pass++) {
+                        const notch = input - damp * band;
+                        low = low + freq * band;
+                        high = notch - low;
+                        band = freq * high + band - drive * band * band * band;
+                        outLow += 0.5 * low;
+                    }
+                    return outLow;
+                },
+            };
+        }
+
+        function renderKickBuffer(audio, settings) {
+            const sampleRate = audio.sampleRate;
+            const length = Math.ceil((settings.ampDecay + 0.08) * sampleRate);
+            const buffer = audio.createBuffer(1, length, sampleRate);
+            const data = buffer.getChannelData(0);
+            const svf = makeSvf(sampleRate, settings.cutoff, settings.resonance);
+            const ampDecay = Math.exp(-1 / (settings.ampDecay * sampleRate));
+            const pitchDecay = Math.exp(-1 / (settings.pitchDecay * sampleRate));
+
+            let ampEnv = 1;
+            let pitchEnv = 1;
+            let phase = 0;
+
+            for(let i = 0; i < length; i++) {
+                const freq = settings.baseFreq + settings.pitchAmount * pitchEnv;
+                phase += freq / sampleRate;
+                phase -= Math.floor(phase);
+
+                let sig = Math.sin(phase * Math.PI * 2) * ampEnv;
+                sig = applyPreFilterDistortion(sig, settings);
+                sig = svf.process(sig);
+
+                if(settings.saturationOn && settings.saturationPost) {
+                    sig = saturate(sig, settings.saturationDrive);
+                }
+
+                data[i] = sig * settings.gain;
+                ampEnv *= ampDecay;
+                pitchEnv *= pitchDecay;
             }
 
-            node.connect(output);
+            return buffer;
         }
 
         async function triggerKick() {
@@ -572,38 +610,14 @@
             await audio.resume();
 
             const now = audio.currentTime;
-            const baseFreq = value("baseFreq");
-            const startFreq = baseFreq + value("pitchAmount");
-            const pitchDecay = value("pitchDecay");
-            const ampDecay = value("ampDecay");
-            const gain = value("gain");
-            const resonance = value("resonance");
             const settings = currentSettings();
 
-            const osc = audio.createOscillator();
-            const filter = audio.createBiquadFilter();
-            const amp = audio.createGain();
+            const source = audio.createBufferSource();
+            source.buffer = renderKickBuffer(audio, settings);
+            source.connect(state.master);
+            source.start(now);
 
-            osc.type = "sine";
-            osc.frequency.setValueAtTime(startFreq, now);
-            osc.frequency.exponentialRampToValueAtTime(Math.max(1, baseFreq), now + pitchDecay);
-
-            filter.type = "lowpass";
-            filter.frequency.setValueAtTime(value("cutoff"), now);
-            filter.Q.setValueAtTime(0.5 + resonance * 12.0, now);
-
-            amp.gain.setValueAtTime(0, now);
-            amp.gain.linearRampToValueAtTime(gain, now + 0.002);
-            amp.gain.exponentialRampToValueAtTime(0.0001, now + ampDecay);
-
-            addDistortion(audio, osc, filter, settings, false);
-            addDistortion(audio, filter, amp, settings, true);
-            amp.connect(state.master);
-
-            osc.start(now);
-            osc.stop(now + ampDecay + 0.08);
-
-            els.status.textContent = `Kick ${baseFreq.toFixed(0)} Hz, res ${resonance.toFixed(2)}`;
+            els.status.textContent = `Kick ${settings.baseFreq.toFixed(0)} Hz, res ${settings.resonance.toFixed(2)}`;
         }
 
         function toggleRepeat() {

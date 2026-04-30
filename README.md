@@ -160,7 +160,7 @@ The workspace is configured to use Git Bash as the default integrated terminal o
 
 ## Browser Preview
 
-The Daisy firmware cannot run directly on the PC. For quick sound-design work before flashing, this repo includes a browser preview that mirrors the kick parameters with the Web Audio API.
+The Daisy firmware cannot run directly on the PC. For quick sound-design work before flashing, this repo includes a browser preview that renders the kick sample-by-sample in JavaScript using the same parameter names, envelope math, signal order, and basic distortion formulas as the firmware.
 
 Open:
 
@@ -191,6 +191,8 @@ The preview lets you:
 - Print the current settings as C++ firmware constants.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/kicki.cpp`, build with `make`, and flash with `make program-dfu`.
+
+The preview is close enough for design work, but the Daisy Seed hardware is still the final sound reference. DaisySP `Overdrive`, `Wavefolder`, and `Svf` are approximated in JavaScript.
 
 The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/kicki.cpp`. Browser BPM/repeat is only for auditioning and is not burned into the Daisy firmware.
 
