@@ -177,9 +177,9 @@ start preview/kicki/index.html
 The preview lets you:
 
 - Trigger the bassdrum.
-- Repeat the bassdrum every 750 ms.
-- Set BPM manually.
-- Tap a tempo for the repeat rate.
+- Repeat the bassdrum in the browser for auditioning.
+- Set browser preview BPM manually.
+- Tap a browser preview tempo.
 - Change base pitch.
 - Change pitch drop and pitch decay.
 - Change body decay.
@@ -191,7 +191,7 @@ The preview lets you:
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/kicki.cpp`, build with `make`, and flash with `make program-dfu`.
 
-The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/kicki.cpp`.
+The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/kicki.cpp`. Browser BPM/repeat is only for auditioning and is not burned into the Daisy firmware.
 
 For the fastest path:
 

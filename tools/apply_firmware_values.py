@@ -16,7 +16,6 @@ ALLOWED_NAMES = {
     "kLowpassCutoffHz",
     "kResonance",
     "kOutputGain",
-    "kRepeatTimeSec",
 }
 
 CONSTANT_RE = re.compile(

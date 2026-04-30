@@ -297,7 +297,6 @@
 
         function firmwareValueText() {
             const settings = currentSettings();
-            const repeatSec = 60 / settings.bpm;
 
             return [
                 "constexpr float kBaseFreqHz       = " + settings.baseFreq.toFixed(1) + "f;",
@@ -307,7 +306,6 @@
                 "constexpr float kLowpassCutoffHz  = " + settings.cutoff.toFixed(1) + "f;",
                 "constexpr float kResonance        = " + settings.resonance.toFixed(2) + "f;",
                 "constexpr float kOutputGain       = " + settings.gain.toFixed(2) + "f;",
-                "constexpr float kRepeatTimeSec    = " + repeatSec.toFixed(3) + "f;",
             ].join("\n");
         }
 
