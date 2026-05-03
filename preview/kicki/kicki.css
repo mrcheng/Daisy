@@ -388,6 +388,37 @@ button {
     opacity: 0.7;
 }
 
+.spectrum {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.spectrum-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.spectrum-header span:last-child {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.spectrum-canvas {
+    display: block;
+    width: 100%;
+    height: 160px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f9faf8;
+}
+
 .memory {
     margin-top: 20px;
     display: grid;
