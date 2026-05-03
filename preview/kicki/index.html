@@ -178,6 +178,7 @@
                 <button class="secondary" id="repeat">Repeat</button>
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
                 <button class="danger" id="stop">Stop</button>
+                <button class="secondary" id="randomize">Randomize</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
 
@@ -278,6 +279,7 @@
             loadPreset: document.querySelector("#loadPreset"),
             presetFile: document.querySelector("#presetFile"),
             stop: document.querySelector("#stop"),
+            randomize: document.querySelector("#randomize"),
             tempoReadout: document.querySelector("#tempoReadout"),
             firmwareValues: document.querySelector("#firmwareValues"),
             vuFill: document.querySelector("#vuFill"),
@@ -294,6 +296,23 @@
         };
 
         const distortionDriveIds = [
+            "simpleClipDrive",
+            "overdriveDrive",
+            "wavefolderDrive",
+            "saturationDrive",
+        ];
+
+        const randomizableControlIds = [
+            "baseFreq",
+            "pitchAmount",
+            "pitchDecay",
+            "attack",
+            "ampDecay",
+            "sustain",
+            "release",
+            "cutoff",
+            "resonance",
+            "masterDist",
             "simpleClipDrive",
             "overdriveDrive",
             "wavefolderDrive",
@@ -701,6 +720,32 @@
             control.value = String(clamp(snapped, min, max));
         }
 
+        function randomValueForControl(id) {
+            const control = controls[id];
+            const min = Number(control.min);
+            const max = Number(control.max);
+            const step = Number(control.step || 0.001);
+            const steps = Math.round((max - min) / step);
+            return min + Math.floor(Math.random() * (steps + 1)) * step;
+        }
+
+        function randomizeParameters() {
+            randomizableControlIds.forEach((id) => {
+                setControl(id, randomValueForControl(id));
+            });
+
+            Object.values(toggles).forEach((toggle) => {
+                toggle.checked = Math.random() >= 0.5;
+            });
+
+            els.saturationPosition.value = Math.random() >= 0.5 ? "post" : "pre";
+            state.distMaster = value("masterDist");
+            updateReadouts();
+            updateFirmwareValues();
+            saveSettings();
+            els.status.textContent = "Randomized sound parameters";
+        }
+
         function graphPoint(event) {
             const rect = els.adsrGraph.getBoundingClientRect();
             const x = ((event.clientX - rect.left) / rect.width) * 360;
@@ -1025,6 +1070,7 @@
         els.loadPreset.addEventListener("click", () => els.presetFile.click());
         els.presetFile.addEventListener("change", () => loadPresetFile(els.presetFile.files[0]));
         els.stop.addEventListener("click", stopRepeat);
+        els.randomize.addEventListener("click", randomizeParameters);
 
         loadSettings();
         updateReadouts();
