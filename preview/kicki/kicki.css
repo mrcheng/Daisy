@@ -210,11 +210,22 @@ select:disabled {
 
 .adsr-graph {
     width: 100%;
-    height: 150px;
+    height: 170px;
     border: 1px solid var(--line);
     border-radius: 6px;
     background: #fbfcfb;
     touch-action: none;
+}
+
+.adsr-time-labels {
+    pointer-events: none;
+}
+
+.adsr-time-label {
+    fill: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    vector-effect: non-scaling-stroke;
 }
 
 .adsr-graph polyline {
@@ -223,6 +234,7 @@ select:disabled {
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
 }
 
 .adsr-handle {
@@ -230,6 +242,7 @@ select:disabled {
     stroke: var(--accent);
     stroke-width: 3;
     cursor: grab;
+    vector-effect: non-scaling-stroke;
 }
 
 .adsr-handle:active {

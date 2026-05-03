@@ -61,7 +61,14 @@
 
             <div class="adsr-panel">
                 <label>ADSR</label>
-                <svg id="adsrGraph" class="adsr-graph" viewBox="0 0 360 150" role="img" aria-label="ADSR envelope editor">
+                <svg id="adsrGraph" class="adsr-graph" viewBox="0 0 360 170" role="img" aria-label="ADSR envelope editor">
+                    <g class="adsr-time-labels" aria-hidden="true">
+                        <text id="adsrStartLabel" class="adsr-time-label">0 ms</text>
+                        <text id="adsrAttackLabel" class="adsr-time-label"></text>
+                        <text id="adsrDecayLabel" class="adsr-time-label"></text>
+                        <text id="adsrEndLabel" class="adsr-time-label"></text>
+                        <text id="adsrMaxLabel" class="adsr-time-label">2000 ms</text>
+                    </g>
                     <polyline id="adsrLine" points=""></polyline>
                     <circle class="adsr-handle" id="adsrAttackHandle" r="7"></circle>
                     <circle class="adsr-handle" id="adsrDecayHandle" r="7"></circle>
@@ -179,21 +186,13 @@
                 <button class="secondary" id="tapTempo">Tap Tempo</button>
                 <button class="danger" id="stop">Stop</button>
                 <button class="secondary" id="randomize">Randomize</button>
+                <button class="secondary" id="randomizeWithoutAdsr">Randomize without ADSR</button>
                 <span class="tempo-readout" id="tempoReadout">80 BPM</span>
             </div>
 
             <div class="tempo-control" aria-label="Manual BPM control">
                 <input id="bpm" type="range" min="30" max="300" step="1" value="80">
                 <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
-            </div>
-
-            <div class="firmware-output" aria-label="Firmware values">
-                <textarea id="firmwareValues" spellcheck="false" readonly></textarea>
-                <div class="firmware-actions">
-                    <button class="secondary" id="printValues">Print Firmware Values</button>
-                    <button class="secondary" id="copyValues">Copy Values</button>
-                </div>
-                <div class="firmware-note">These are the constants to put in src/kicki.cpp before building and flashing the Daisy Seed.</div>
             </div>
 
             <div class="vu" aria-label="Output VU meter">
@@ -214,6 +213,15 @@
                 </div>
                 <div class="memory-grid" id="memoryGrid"></div>
                 <div class="memory-note">Refresh after firmware changes: python tools/update_memory_report.py</div>
+            </div>
+
+            <div class="firmware-output" aria-label="Firmware values">
+                <textarea id="firmwareValues" spellcheck="false" readonly></textarea>
+                <div class="firmware-actions">
+                    <button class="secondary" id="printValues">Print Firmware Values</button>
+                    <button class="secondary" id="copyValues">Copy Values</button>
+                </div>
+                <div class="firmware-note">These are the constants to put in src/kicki.cpp before building and flashing the Daisy Seed.</div>
             </div>
 
             <div class="preset-actions" aria-label="Kicki preset files">
@@ -280,6 +288,7 @@
             presetFile: document.querySelector("#presetFile"),
             stop: document.querySelector("#stop"),
             randomize: document.querySelector("#randomize"),
+            randomizeWithoutAdsr: document.querySelector("#randomizeWithoutAdsr"),
             tempoReadout: document.querySelector("#tempoReadout"),
             firmwareValues: document.querySelector("#firmwareValues"),
             vuFill: document.querySelector("#vuFill"),
@@ -293,7 +302,14 @@
             adsrAttackHandle: document.querySelector("#adsrAttackHandle"),
             adsrDecayHandle: document.querySelector("#adsrDecayHandle"),
             adsrReleaseHandle: document.querySelector("#adsrReleaseHandle"),
+            adsrStartLabel: document.querySelector("#adsrStartLabel"),
+            adsrAttackLabel: document.querySelector("#adsrAttackLabel"),
+            adsrDecayLabel: document.querySelector("#adsrDecayLabel"),
+            adsrEndLabel: document.querySelector("#adsrEndLabel"),
+            adsrMaxLabel: document.querySelector("#adsrMaxLabel"),
         };
+
+        const ADSR_GRAPH_SECONDS = 2.0;
 
         const distortionDriveIds = [
             "simpleClipDrive",
@@ -317,6 +333,13 @@
             "overdriveDrive",
             "wavefolderDrive",
             "saturationDrive",
+        ];
+
+        const adsrControlIds = [
+            "attack",
+            "ampDecay",
+            "sustain",
+            "release",
         ];
 
         function getAudio() {
@@ -669,18 +692,26 @@
         }
 
         function adsrPoints() {
-            const left = 16;
-            const right = 344;
-            const top = 16;
-            const bottom = 130;
+            const rect = els.adsrGraph.getBoundingClientRect();
+            const viewWidth = rect.width > 0 && rect.height > 0
+                ? 170 * (rect.width / rect.height)
+                : 360;
+            const left = 0;
+            const right = viewWidth;
+            const top = 42;
+            const bottom = 148;
             const attack = value("attack");
             const decay = value("ampDecay");
             const sustain = value("sustain");
             const release = value("release");
             const total = attack + decay + release;
             const width = right - left;
-            const attackX = left + width * (attack / total);
-            const decayX = left + width * ((attack + decay) / total);
+            const attackEnd = attack;
+            const decayEnd = attack + decay;
+            const releaseEnd = total;
+            const attackX = left + width * (attackEnd / ADSR_GRAPH_SECONDS);
+            const decayX = left + width * (decayEnd / ADSR_GRAPH_SECONDS);
+            const releaseX = left + width * (releaseEnd / ADSR_GRAPH_SECONDS);
             const sustainY = bottom - (bottom - top) * sustain;
 
             return {
@@ -688,27 +719,66 @@
                 right,
                 top,
                 bottom,
+                width,
+                attack,
+                decay,
+                release,
+                total,
+                attackEnd,
+                decayEnd,
+                releaseEnd,
                 attackX,
                 decayX,
+                releaseX,
                 sustainY,
                 points: [
                     [left, bottom],
                     [attackX, top],
                     [decayX, sustainY],
-                    [right, bottom],
+                    [releaseX, bottom],
                 ],
             };
         }
 
+        function setAdsrLabel(label, x, y, text, anchor = "middle") {
+            label.setAttribute("x", x);
+            label.setAttribute("y", y);
+            label.setAttribute("text-anchor", anchor);
+            label.textContent = text;
+        }
+
+        function updateAdsrTimeLabels(graph) {
+            const labels = [
+                { el: els.adsrStartLabel, x: graph.left, text: "0 ms", anchor: "start" },
+                { el: els.adsrAttackLabel, x: graph.attackX, text: `${Math.round(graph.attackEnd * 1000)} ms`, anchor: "middle" },
+                { el: els.adsrDecayLabel, x: graph.decayX, text: `${Math.round(graph.decayEnd * 1000)} ms`, anchor: "middle" },
+                { el: els.adsrEndLabel, x: graph.releaseX, text: `${Math.round(graph.releaseEnd * 1000)} ms`, anchor: "middle" },
+                { el: els.adsrMaxLabel, x: graph.right, text: `${Math.round(ADSR_GRAPH_SECONDS * 1000)} ms`, anchor: "end" },
+            ];
+            let previousRowX = Number.NEGATIVE_INFINITY;
+
+            labels.forEach((label) => {
+                const isCrowded = label.x - previousRowX < 54;
+                const y = isCrowded ? 32 : 18;
+                setAdsrLabel(label.el, label.x, y, label.text, label.anchor);
+
+                if(!isCrowded) {
+                    previousRowX = label.x;
+                }
+            });
+        }
+
         function updateAdsrGraph() {
             const graph = adsrPoints();
+            els.adsrGraph.setAttribute("viewBox", `0 0 ${graph.width} 170`);
             els.adsrLine.setAttribute("points", graph.points.map((point) => point.join(",")).join(" "));
             els.adsrAttackHandle.setAttribute("cx", graph.attackX);
             els.adsrAttackHandle.setAttribute("cy", graph.top);
             els.adsrDecayHandle.setAttribute("cx", graph.decayX);
             els.adsrDecayHandle.setAttribute("cy", graph.sustainY);
-            els.adsrReleaseHandle.setAttribute("cx", graph.right);
+            els.adsrReleaseHandle.setAttribute("cx", graph.releaseX);
             els.adsrReleaseHandle.setAttribute("cy", graph.bottom);
+            updateAdsrTimeLabels(graph);
         }
 
         function setControl(id, nextValue) {
@@ -729,8 +799,14 @@
             return min + Math.floor(Math.random() * (steps + 1)) * step;
         }
 
-        function randomizeParameters() {
+        function randomizeParameters(keepAdsr = false) {
+            const skippedIds = keepAdsr ? new Set(adsrControlIds) : new Set();
+
             randomizableControlIds.forEach((id) => {
+                if(skippedIds.has(id)) {
+                    return;
+                }
+
                 setControl(id, randomValueForControl(id));
             });
 
@@ -743,35 +819,58 @@
             updateReadouts();
             updateFirmwareValues();
             saveSettings();
-            els.status.textContent = "Randomized sound parameters";
+            els.status.textContent = keepAdsr
+                ? "Randomized sound parameters without ADSR"
+                : "Randomized sound parameters";
         }
 
         function graphPoint(event) {
             const rect = els.adsrGraph.getBoundingClientRect();
-            const x = ((event.clientX - rect.left) / rect.width) * 360;
-            const y = ((event.clientY - rect.top) / rect.height) * 150;
-            return { x: clamp(x, 16, 344), y: clamp(y, 16, 130) };
+            const graph = adsrPoints();
+            const x = ((event.clientX - rect.left) / rect.width) * graph.width;
+            const y = ((event.clientY - rect.top) / rect.height) * 170;
+            return { x: clamp(x, 0, graph.width), y: clamp(y, 42, 148) };
+        }
+
+        function secondsFromGraphX(x) {
+            const graph = adsrPoints();
+            return ((x - graph.left) / graph.width) * ADSR_GRAPH_SECONDS;
         }
 
         function updateFromAdsrDrag(handle, event, target) {
             const point = graphPoint(event);
             const graph = adsrPoints();
-            const total = value("attack") + value("ampDecay") + value("release");
-            const t = (point.x - graph.left) / (graph.right - graph.left);
+            const startAttack = Number(target.dataset.startAttack || value("attack"));
+            const startDecay = Number(target.dataset.startDecay || value("ampDecay"));
+            const startRelease = Number(target.dataset.startRelease || value("release"));
+            const startTotal = Number(target.dataset.startTotal || graph.total);
+            const startDecayEnd = startAttack + startDecay;
+            const elapsed = secondsFromGraphX(point.x);
 
             if(handle === "attack") {
-                setControl("attack", total * clamp(t, 0.01, 0.6));
+                const minAttack = Number(controls.attack.min);
+                const maxAttack = Number(controls.attack.max);
+                const minDecay = Number(controls.ampDecay.min);
+                const nextAttack = clamp(elapsed, minAttack, Math.min(maxAttack, startDecayEnd - minDecay));
+                setControl("attack", nextAttack);
+                setControl("ampDecay", startDecayEnd - value("attack"));
             } else if(handle === "decay") {
-                const attack = value("attack");
-                setControl("ampDecay", Math.max(0.02, total * t - attack));
+                const minDecay = Number(controls.ampDecay.min);
+                const maxDecay = Number(controls.ampDecay.max);
+                const minRelease = Number(controls.release.min);
+                const nextDecayEnd = clamp(
+                    elapsed,
+                    startAttack + minDecay,
+                    Math.min(startAttack + maxDecay, startTotal - minRelease)
+                );
+                setControl("ampDecay", nextDecayEnd - startAttack);
+                setControl("release", startTotal - nextDecayEnd);
                 setControl("sustain", 1 - ((point.y - graph.top) / (graph.bottom - graph.top)));
             } else if(handle === "release") {
-                const rect = els.adsrGraph.getBoundingClientRect();
-                const startX = Number(target.dataset.startX || event.clientX);
-                const startRelease = Number(target.dataset.startRelease || value("release"));
-                const secondsPerGraphWidth = 1.2;
-                const delta = ((event.clientX - startX) / rect.width) * secondsPerGraphWidth;
-                setControl("release", startRelease + delta);
+                const minRelease = Number(controls.release.min);
+                const maxRelease = Number(controls.release.max);
+                const nextRelease = clamp(elapsed - startDecayEnd, minRelease, maxRelease);
+                setControl("release", nextRelease);
             }
 
             updateReadouts();
@@ -782,10 +881,11 @@
         function setupAdsrDrag(handle, name) {
             handle.addEventListener("pointerdown", (event) => {
                 event.preventDefault();
-                if(name === "release") {
-                    handle.dataset.startX = String(event.clientX);
-                    handle.dataset.startRelease = String(value("release"));
-                }
+                handle.dataset.startX = String(event.clientX);
+                handle.dataset.startAttack = String(value("attack"));
+                handle.dataset.startDecay = String(value("ampDecay"));
+                handle.dataset.startRelease = String(value("release"));
+                handle.dataset.startTotal = String(value("attack") + value("ampDecay") + value("release"));
                 handle.setPointerCapture(event.pointerId);
                 updateFromAdsrDrag(name, event, handle);
             });
@@ -1055,6 +1155,7 @@
 
         controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
         controls.bpmNumber.addEventListener("input", () => setBpm(value("bpmNumber")));
+        window.addEventListener("resize", updateAdsrGraph);
 
         setupAdsrDrag(els.adsrAttackHandle, "attack");
         setupAdsrDrag(els.adsrDecayHandle, "decay");
@@ -1071,6 +1172,7 @@
         els.presetFile.addEventListener("change", () => loadPresetFile(els.presetFile.files[0]));
         els.stop.addEventListener("click", stopRepeat);
         els.randomize.addEventListener("click", randomizeParameters);
+        els.randomizeWithoutAdsr.addEventListener("click", () => randomizeParameters(true));
 
         loadSettings();
         updateReadouts();
