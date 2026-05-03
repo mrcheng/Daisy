@@ -35,7 +35,7 @@ constexpr float kOutputGain       = 0.70f;
 // Reserved for a future 10k pot: 3V3 -> pot -> GND, wiper to Daisy Seed A0/D15.
 constexpr bool  kMasterDistKnobEnabled = false;
 constexpr Pin   kMasterDistKnobPin     = seed::A0;
-constexpr float kMasterDistMin         = 0.10f;
+constexpr float kMasterDistMin         = 0.00f;
 constexpr float kMasterDistMax         = 2.00f;
 
 float pitch_env;

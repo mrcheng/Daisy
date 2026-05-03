@@ -1,6 +1,6 @@
 window.KICKI_MEMORY_REPORT = {
     "target": "KickiDanielsson",
-    "generatedAt": "2026-05-03T16:16:40+02:00",
+    "generatedAt": "2026-05-03T16:36:32+02:00",
     "regions": [
         {
             "name": "FLASH",
