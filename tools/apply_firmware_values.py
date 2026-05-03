@@ -28,8 +28,11 @@ ALLOWED_NAMES = {
     "kSaturationPost",
     "kSaturationDrive",
     "kTwisterOn",
+    "kTwisterPost",
+    "kTwisterMaster",
     "kTwisterPull",
     "kTwisterRecoverySec",
+    "kTwisterAccent",
     "kTwisterStruggle",
     "kOutputGain",
 }

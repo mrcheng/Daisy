@@ -56,6 +56,23 @@
                             <span>Good vibrations</span>
                         </div>
                     </div>
+                    <div class="rack-control rack-mastertwister">
+                        <div class="rack-knob-scale" aria-hidden="true"></div>
+                        <div
+                            class="rack-knob"
+                            id="rackTwisterKnob"
+                            role="slider"
+                            tabindex="0"
+                            aria-label="Master Kicki-Twister"
+                            aria-valuemin="0"
+                            aria-valuemax="2"
+                            aria-valuenow="1"
+                        ></div>
+                        <div class="rack-vibration-row" aria-hidden="true">
+                            <span>Sloppy</span>
+                            <span>Twisted</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="rack-preset-header">
@@ -213,6 +230,20 @@
                     <span>Daisy-safe sag compressor</span>
                 </div>
                 <div class="twister-controls">
+                    <div class="control twister-position-control">
+                        <label for="twisterPosition">Position</label>
+                        <select id="twisterPosition">
+                            <option value="pre">Before Good Vibrations</option>
+                            <option value="post" selected>After Good Vibrations</option>
+                        </select>
+                    </div>
+                    <div class="control">
+                        <label for="masterTwister">Master Kicki-Twister</label>
+                        <div class="value-row">
+                            <input id="masterTwister" type="range" min="0" max="2" step="0.01" value="1">
+                            <span class="readout" id="masterTwisterReadout">1.00x</span>
+                        </div>
+                    </div>
                     <div class="control">
                         <label for="twisterPull">Pull</label>
                         <div class="value-row">
@@ -225,6 +256,13 @@
                         <div class="value-row">
                             <input id="twisterRecovery" type="range" min="0.03" max="0.8" step="0.01" value="0.22">
                             <span class="readout" id="twisterRecoveryReadout">220 ms</span>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="twisterAccent">Accent</label>
+                        <div class="value-row">
+                            <input id="twisterAccent" type="range" min="0" max="1" step="0.01" value="0.30">
+                            <span class="readout" id="twisterAccentReadout">0.30</span>
                         </div>
                     </div>
                     <div class="control">
@@ -431,8 +469,10 @@
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
             masterDist: document.querySelector("#masterDist"),
+            masterTwister: document.querySelector("#masterTwister"),
             twisterPull: document.querySelector("#twisterPull"),
             twisterRecovery: document.querySelector("#twisterRecovery"),
+            twisterAccent: document.querySelector("#twisterAccent"),
             twisterStruggle: document.querySelector("#twisterStruggle"),
             simpleClipDrive: document.querySelector("#simpleClipDrive"),
             overdriveDrive: document.querySelector("#overdriveDrive"),
@@ -476,6 +516,7 @@
             scopeHold: document.querySelector("#scopeHold"),
             scopeHoldReadout: document.querySelector("#scopeHoldReadout"),
             rackMasterDistKnob: document.querySelector("#rackMasterDistKnob"),
+            rackTwisterKnob: document.querySelector("#rackTwisterKnob"),
             rackMasterDistHelp: document.querySelector("#rackMasterDistHelp"),
             rackLed: document.querySelector("#rackLed"),
             rackLedHelp: document.querySelector("#rackLedHelp"),
@@ -496,6 +537,7 @@
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
             saturationPosition: document.querySelector("#saturationPosition"),
+            twisterPosition: document.querySelector("#twisterPosition"),
             adsrGraph: document.querySelector("#adsrGraph"),
             adsrLine: document.querySelector("#adsrLine"),
             adsrAttackHandle: document.querySelector("#adsrAttackHandle"),
@@ -526,8 +568,10 @@
             "cutoff",
             "resonance",
             "masterDist",
+            "masterTwister",
             "twisterPull",
             "twisterRecovery",
+            "twisterAccent",
             "twisterStruggle",
             "simpleClipDrive",
             "overdriveDrive",
@@ -557,6 +601,7 @@
                     cutoff: 790,
                     resonance: 0.78,
                     masterDist: 1,
+                    masterTwister: 1,
                     simpleClipOn: true,
                     simpleClipDrive: 0.02,
                     overdriveOn: true,
@@ -566,9 +611,11 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.07,
+                    twisterPost: true,
                     twisterOn: true,
                     twisterPull: 0.35,
                     twisterRecovery: 0.22,
+                    twisterAccent: 0.3,
                     twisterStruggle: 0.32,
                     gain: 0.7,
                     bpm: 80,
@@ -587,6 +634,7 @@
                     cutoff: 960,
                     resonance: 0.52,
                     masterDist: 0.85,
+                    masterTwister: 0.85,
                     simpleClipOn: true,
                     simpleClipDrive: 0.08,
                     overdriveOn: false,
@@ -596,9 +644,11 @@
                     saturationOn: true,
                     saturationPost: false,
                     saturationDrive: 0.14,
+                    twisterPost: true,
                     twisterOn: true,
                     twisterPull: 0.28,
                     twisterRecovery: 0.18,
+                    twisterAccent: 0.24,
                     twisterStruggle: 0.24,
                     gain: 0.68,
                     bpm: 92,
@@ -617,6 +667,7 @@
                     cutoff: 1450,
                     resonance: 0.68,
                     masterDist: 1.45,
+                    masterTwister: 1.35,
                     simpleClipOn: true,
                     simpleClipDrive: 0.24,
                     overdriveOn: true,
@@ -626,9 +677,11 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.18,
+                    twisterPost: false,
                     twisterOn: true,
                     twisterPull: 0.48,
                     twisterRecovery: 0.16,
+                    twisterAccent: 0.46,
                     twisterStruggle: 0.52,
                     gain: 0.62,
                     bpm: 128,
@@ -647,6 +700,7 @@
                     cutoff: 520,
                     resonance: 0.44,
                     masterDist: 0.42,
+                    masterTwister: 0,
                     simpleClipOn: false,
                     simpleClipDrive: 0.06,
                     overdriveOn: false,
@@ -656,9 +710,11 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.05,
+                    twisterPost: true,
                     twisterOn: false,
                     twisterPull: 0.22,
                     twisterRecovery: 0.36,
+                    twisterAccent: 0.18,
                     twisterStruggle: 0.14,
                     gain: 0.72,
                     bpm: 72,
@@ -677,6 +733,7 @@
                     cutoff: 680,
                     resonance: 0.82,
                     masterDist: 1.15,
+                    masterTwister: 1.1,
                     simpleClipOn: false,
                     simpleClipDrive: 0.12,
                     overdriveOn: true,
@@ -686,9 +743,11 @@
                     saturationOn: true,
                     saturationPost: false,
                     saturationDrive: 0.2,
+                    twisterPost: false,
                     twisterOn: true,
                     twisterPull: 0.42,
                     twisterRecovery: 0.31,
+                    twisterAccent: 0.34,
                     twisterStruggle: 0.38,
                     gain: 0.64,
                     bpm: 105,
@@ -707,6 +766,7 @@
                     cutoff: 2300,
                     resonance: 0.28,
                     masterDist: 1.8,
+                    masterTwister: 1.6,
                     simpleClipOn: true,
                     simpleClipDrive: 0.32,
                     overdriveOn: true,
@@ -716,9 +776,11 @@
                     saturationOn: false,
                     saturationPost: true,
                     saturationDrive: 0.1,
+                    twisterPost: true,
                     twisterOn: true,
                     twisterPull: 0.55,
                     twisterRecovery: 0.09,
+                    twisterAccent: 0.62,
                     twisterStruggle: 0.68,
                     gain: 0.55,
                     bpm: 150,
@@ -1185,9 +1247,12 @@
                 cutoff: value("cutoff"),
                 resonance: value("resonance"),
                 masterDist: value("masterDist"),
+                masterTwister: value("masterTwister"),
                 twisterOn: checked("twisterOn"),
+                twisterPost: els.twisterPosition.value === "post",
                 twisterPull: value("twisterPull"),
                 twisterRecovery: value("twisterRecovery"),
+                twisterAccent: value("twisterAccent"),
                 twisterStruggle: value("twisterStruggle"),
                 simpleClipOn: checked("simpleClipOn"),
                 simpleClipDrive: value("simpleClipDrive"),
@@ -1248,8 +1313,10 @@
                 cutoff: "cutoff",
                 resonance: "resonance",
                 masterDist: "masterDist",
+                masterTwister: "masterTwister",
                 twisterPull: "twisterPull",
                 twisterRecovery: "twisterRecovery",
+                twisterAccent: "twisterAccent",
                 twisterStruggle: "twisterStruggle",
                 simpleClipDrive: "simpleClipDrive",
                 overdriveDrive: "overdriveDrive",
@@ -1276,6 +1343,10 @@
 
             if(typeof settings.saturationPost === "boolean") {
                 els.saturationPosition.value = settings.saturationPost ? "post" : "pre";
+            }
+
+            if(typeof settings.twisterPost === "boolean") {
+                els.twisterPosition.value = settings.twisterPost ? "post" : "pre";
             }
 
             state.distMaster = value("masterDist");
@@ -1527,8 +1598,11 @@
                 "constexpr bool  kSaturationPost   = " + String(settings.saturationPost) + ";",
                 "constexpr float kSaturationDrive  = " + settings.saturationDrive.toFixed(2) + "f;",
                 "constexpr bool  kTwisterOn        = " + String(settings.twisterOn) + ";",
+                "constexpr bool  kTwisterPost      = " + String(settings.twisterPost) + ";",
+                "constexpr float kTwisterMaster    = " + settings.masterTwister.toFixed(2) + "f;",
                 "constexpr float kTwisterPull      = " + settings.twisterPull.toFixed(2) + "f;",
                 "constexpr float kTwisterRecoverySec = " + settings.twisterRecovery.toFixed(3) + "f;",
+                "constexpr float kTwisterAccent    = " + settings.twisterAccent.toFixed(2) + "f;",
                 "constexpr float kTwisterStruggle  = " + settings.twisterStruggle.toFixed(2) + "f;",
                 "constexpr float kOutputGain       = " + settings.gain.toFixed(2) + "f;",
             ].join("\n");
@@ -1569,8 +1643,10 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#masterDistReadout").textContent = `${value("masterDist").toFixed(2)}x`;
+            document.querySelector("#masterTwisterReadout").textContent = `${value("masterTwister").toFixed(2)}x`;
             document.querySelector("#twisterPullReadout").textContent = value("twisterPull").toFixed(2);
             document.querySelector("#twisterRecoveryReadout").textContent = `${Math.round(value("twisterRecovery") * 1000)} ms`;
+            document.querySelector("#twisterAccentReadout").textContent = value("twisterAccent").toFixed(2);
             document.querySelector("#twisterStruggleReadout").textContent = value("twisterStruggle").toFixed(2);
             document.querySelector("#simpleClipDriveReadout").textContent = value("simpleClipDrive").toFixed(2);
             document.querySelector("#overdriveDriveReadout").textContent = value("overdriveDrive").toFixed(2);
@@ -1579,65 +1655,75 @@
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
             updateRackMasterDistKnob();
+            updateRackTwisterKnob();
             drawRackOled();
             drawTwisterWaveform();
             els.saturationPosition.disabled = !checked("saturationOn");
             updateAdsrGraph();
         }
 
-        function updateRackMasterDistKnob() {
-            const min = Number(controls.masterDist.min);
-            const max = Number(controls.masterDist.max);
-            const current = value("masterDist");
+        function updateRackKnob(knob, controlId) {
+            const control = controls[controlId];
+            const min = Number(control.min);
+            const max = Number(control.max);
+            const current = value(controlId);
             const normalized = (current - min) / (max - min);
             const angle = -135 + clamp(normalized, 0, 1) * 270;
 
-            els.rackMasterDistKnob.style.setProperty("--rack-knob-angle", `${angle}deg`);
-            els.rackMasterDistKnob.setAttribute("aria-valuenow", current.toFixed(2));
+            knob.style.setProperty("--rack-knob-angle", `${angle}deg`);
+            knob.setAttribute("aria-valuenow", current.toFixed(2));
         }
 
-        function setMasterDistFromRack(nextValue) {
-            setControl("masterDist", nextValue);
-            controls.masterDist.dispatchEvent(new Event("input", { bubbles: true }));
+        function updateRackMasterDistKnob() {
+            updateRackKnob(els.rackMasterDistKnob, "masterDist");
         }
 
-        function setupRackMasterDistKnob() {
+        function updateRackTwisterKnob() {
+            updateRackKnob(els.rackTwisterKnob, "masterTwister");
+        }
+
+        function setControlFromRack(controlId, nextValue) {
+            setControl(controlId, nextValue);
+            controls[controlId].dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        function setupRackKnob(knob, controlId) {
             let startY = 0;
             let startValue = 0;
 
-            els.rackMasterDistKnob.addEventListener("pointerdown", (event) => {
+            knob.addEventListener("pointerdown", (event) => {
                 event.preventDefault();
                 startY = event.clientY;
-                startValue = value("masterDist");
-                els.rackMasterDistKnob.setPointerCapture(event.pointerId);
+                startValue = value(controlId);
+                knob.setPointerCapture(event.pointerId);
             });
 
-            els.rackMasterDistKnob.addEventListener("pointermove", (event) => {
-                if(!els.rackMasterDistKnob.hasPointerCapture(event.pointerId)) {
+            knob.addEventListener("pointermove", (event) => {
+                if(!knob.hasPointerCapture(event.pointerId)) {
                     return;
                 }
 
-                const min = Number(controls.masterDist.min);
-                const max = Number(controls.masterDist.max);
+                const min = Number(controls[controlId].min);
+                const max = Number(controls[controlId].max);
                 const dragRangePx = 180;
                 const delta = ((startY - event.clientY) / dragRangePx) * (max - min);
-                setMasterDistFromRack(startValue + delta);
+                setControlFromRack(controlId, startValue + delta);
             });
 
-            els.rackMasterDistKnob.addEventListener("pointerup", (event) => {
-                if(els.rackMasterDistKnob.hasPointerCapture(event.pointerId)) {
-                    els.rackMasterDistKnob.releasePointerCapture(event.pointerId);
+            knob.addEventListener("pointerup", (event) => {
+                if(knob.hasPointerCapture(event.pointerId)) {
+                    knob.releasePointerCapture(event.pointerId);
                 }
             });
 
-            els.rackMasterDistKnob.addEventListener("keydown", (event) => {
+            knob.addEventListener("keydown", (event) => {
                 if(event.key !== "ArrowUp" && event.key !== "ArrowRight" && event.key !== "ArrowDown" && event.key !== "ArrowLeft") {
                     return;
                 }
 
                 event.preventDefault();
                 const direction = event.key === "ArrowUp" || event.key === "ArrowRight" ? 1 : -1;
-                setMasterDistFromRack(value("masterDist") + direction * Number(controls.masterDist.step));
+                setControlFromRack(controlId, value(controlId) + direction * Number(controls[controlId].step));
             });
         }
 
@@ -1979,23 +2065,29 @@
         }
 
         function twisterSample(sig, settings, sampleRate, twister) {
-            if(!settings.twisterOn) {
+            const twisterMaster = settings.masterTwister ?? 1;
+            const twisterPull = clamp(settings.twisterPull * twisterMaster, 0, 1);
+            if(!settings.twisterOn || twisterPull <= 0) {
                 return sig;
             }
 
-            const level = Math.abs(sig);
+            const twisterAccent = clamp(settings.twisterAccent * twisterMaster, 0, 1);
+            const twisterStruggle = clamp(settings.twisterStruggle * twisterMaster, 0, 1);
+            const level = Math.abs(sig) * (1 + twisterAccent * 1.4);
             const attackCoeff = twister.attackCoeff ?? Math.exp(-1 / (0.003 * sampleRate));
             const releaseCoeff = twister.releaseCoeff ?? Math.exp(-1 / (settings.twisterRecovery * sampleRate));
             const coeff = level > twister.env ? attackCoeff : releaseCoeff;
             twister.env = coeff * twister.env + (1 - coeff) * level;
 
             const over = clamp((twister.env - 0.18) / 0.82, 0, 1);
-            const targetSag = over * settings.twisterPull * 0.55;
+            const targetSag = over * twisterPull * 0.55;
             const sagRate = targetSag > twister.sag ? 0.18 : (1 - releaseCoeff);
             twister.sag += (targetSag - twister.sag) * sagRate;
 
-            const strain = settings.twisterStruggle * twister.sag;
-            const strained = saturate(sig + Math.sin(sig * 24) * strain * 0.025, strain * 0.35);
+            const strain = twisterStruggle * twister.sag;
+            const strained = strain > 0
+                ? saturate(sig + Math.sin(sig * 24) * strain * 0.025, strain * 0.35)
+                : sig;
             return strained * (1 - twister.sag);
         }
 
@@ -2034,15 +2126,18 @@
             const previewSettings = { ...settings, twisterOn: true };
             const raw = [];
             const processed = [];
+            const sag = [];
 
             for(let x = 0; x < plotWidth; x++) {
                 const t = x / plotWidth;
-                const hit = Math.exp(-t * 5.6);
-                const body = Math.sin(t * Math.PI * 22) * hit;
-                const click = Math.sin(t * Math.PI * 70) * Math.exp(-t * 30) * 0.35;
-                const sig = (body + click) * (0.75 + settings.twisterPull * 0.28);
+                const hit = Math.exp(-t * 4.2);
+                const body = Math.sin(t * Math.PI * 18) * hit;
+                const click = Math.sin(t * Math.PI * 64) * Math.exp(-t * 22) * 0.42;
+                const previewMaster = settings.masterTwister ?? 1;
+                const sig = (body + click) * (0.95 + clamp(settings.twisterAccent * previewMaster, 0, 1) * 0.34);
                 raw.push(sig);
                 processed.push(twisterSample(sig, previewSettings, sampleRate, twister));
+                sag.push(twister.sag);
             }
 
             ctx.strokeStyle = "#d8ddd8";
@@ -2052,6 +2147,7 @@
             ctx.lineTo(width - plotRight, centerY);
             ctx.stroke();
 
+            drawSagPath(ctx, sag, plotLeft, height - 18, height * 0.28);
             drawWavePath(ctx, raw, plotLeft, centerY, amp, "#aeb5ac", 1.25);
             drawWavePath(ctx, processed, plotLeft, centerY, amp, "#17685e", 2);
 
@@ -2061,6 +2157,22 @@
             ctx.fillText("in", plotLeft, 10);
             ctx.fillStyle = "#17685e";
             ctx.fillText("twisted", plotLeft + 28, 10);
+            ctx.fillStyle = "#c08b24";
+            ctx.fillText("pull", plotLeft + 94, 10);
+        }
+
+        function drawSagPath(ctx, data, left, bottom, height) {
+            ctx.fillStyle = "rgba(192, 139, 36, 0.2)";
+            ctx.beginPath();
+            ctx.moveTo(left, bottom);
+
+            data.forEach((sample, index) => {
+                ctx.lineTo(left + index, bottom - sample * height * 4);
+            });
+
+            ctx.lineTo(left + data.length - 1, bottom);
+            ctx.closePath();
+            ctx.fill();
         }
 
         function drawWavePath(ctx, data, left, centerY, amp, color, lineWidth) {
@@ -2085,7 +2197,10 @@
             return clamp(drive * settings.masterDist, 0, 1);
         }
 
-        function applyPreFilterDistortion(sig, settings) {
+        function applyPreFilterDistortion(sig, settings, sampleRate, twister) {
+            if(settings.twisterOn && !settings.twisterPost) {
+                sig = twisterSample(sig, settings, sampleRate, twister);
+            }
             if(settings.simpleClipOn) {
                 sig = hardClip(sig, effectiveDistDrive(settings, settings.simpleClipDrive));
             }
@@ -2171,14 +2286,16 @@
                 phase -= Math.floor(phase);
 
                 let sig = Math.sin(phase * Math.PI * 2) * ampEnv;
-                sig = applyPreFilterDistortion(sig, settings);
+                sig = applyPreFilterDistortion(sig, settings, sampleRate, twister);
                 sig = svf.process(sig);
 
                 if(settings.saturationOn && settings.saturationPost) {
                     sig = saturate(sig, effectiveDistDrive(settings, settings.saturationDrive));
                 }
 
-                sig = twisterSample(sig, settings, sampleRate, twister);
+                if(settings.twisterPost) {
+                    sig = twisterSample(sig, settings, sampleRate, twister);
+                }
 
                 data[i] = sig * settings.gain;
                 pitchEnv *= pitchDecay;
@@ -2248,6 +2365,11 @@
             els.status.textContent = `Tap tempo ${bpmFromRepeatMs()} BPM`;
         }
 
+        function shouldIgnoreSpaceShortcut(event) {
+            const tagName = event.target?.tagName;
+            return tagName === "INPUT" || tagName === "SELECT" || tagName === "TEXTAREA" || tagName === "BUTTON";
+        }
+
         Object.values(controls).forEach((control) => {
             control.addEventListener("input", () => {
                 state.distMaster = value("masterDist");
@@ -2269,6 +2391,11 @@
             updateFirmwareValues();
             saveSettings();
         });
+        els.twisterPosition.addEventListener("change", () => {
+            updateReadouts();
+            updateFirmwareValues();
+            saveSettings();
+        });
 
         controls.bpm.addEventListener("input", () => setBpm(value("bpm")));
         controls.bpmNumber.addEventListener("input", () => setBpm(value("bpmNumber")));
@@ -2282,7 +2409,8 @@
         setupAdsrDrag(els.adsrAttackHandle, "attack");
         setupAdsrDrag(els.adsrDecayHandle, "decay");
         setupAdsrDrag(els.adsrReleaseHandle, "release");
-        setupRackMasterDistKnob();
+        setupRackKnob(els.rackMasterDistKnob, "masterDist");
+        setupRackKnob(els.rackTwisterKnob, "masterTwister");
         setupRangeSteppers();
 
         els.trigger.addEventListener("click", triggerKick);
@@ -2315,6 +2443,12 @@
         document.addEventListener("keydown", (event) => {
             if(event.key === "Escape" && !els.hardwareModal.hidden) {
                 closeHardwareModal();
+                return;
+            }
+
+            if(event.code === "Space" && !shouldIgnoreSpaceShortcut(event)) {
+                event.preventDefault();
+                toggleRepeat();
             }
         });
 

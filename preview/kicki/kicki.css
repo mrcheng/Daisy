@@ -264,7 +264,7 @@ h1 {
 
 .rack-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
     align-content: center;
     justify-items: center;
@@ -281,9 +281,11 @@ h1 {
     text-transform: uppercase;
 }
 
-.rack-masterdist {
+.rack-masterdist,
+.rack-mastertwister {
     position: relative;
-    width: min(320px, 100%);
+    grid-template-rows: 125px auto;
+    width: 132px;
     min-height: 145px;
     align-content: center;
 }
@@ -295,16 +297,21 @@ h1 {
 }
 
 .rack-vibration-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    width: 150px;
-    margin-top: -8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-self: start;
+    gap: 6px;
+    width: 132px;
     color: var(--muted);
-    font-size: 11px;
+    font-size: 8px;
     font-weight: 800;
     line-height: 1.1;
     text-transform: uppercase;
+}
+
+.rack-vibration-row span {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .rack-vibration-row span:first-child {
@@ -318,7 +325,11 @@ h1 {
 
 .rack-knob {
     --rack-knob-angle: -7deg;
+    position: absolute;
+    top: 31px;
+    left: 50%;
     width: 62px;
+    margin-left: -31px;
     aspect-ratio: 1;
     border: 1px solid #1f2424;
     border-radius: 50%;
@@ -336,18 +347,10 @@ h1 {
     outline-offset: 5px;
 }
 
-.rack-masterdist > .rack-knob {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-top: -31px;
-    margin-left: -31px;
-}
-
 .rack-knob-help {
     position: absolute;
-    top: 30px;
-    right: 78px;
+    top: 24px;
+    right: 6px;
 }
 
 .rack-preset-header {
@@ -741,7 +744,7 @@ select:disabled {
 
 .twister-controls {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 

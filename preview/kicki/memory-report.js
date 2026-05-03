@@ -1,14 +1,14 @@
 window.KICKI_MEMORY_REPORT = {
     "target": "KickiDanielsson",
-    "generatedAt": "2026-05-03T18:25:06+02:00",
+    "generatedAt": "2026-05-03T18:45:15+02:00",
     "regions": [
         {
             "name": "FLASH",
-            "usedBytes": 77676,
+            "usedBytes": 77708,
             "totalBytes": 131072,
             "used": "75.9 KB",
             "total": "128 KB",
-            "percent": 59.26
+            "percent": 59.29
         },
         {
             "name": "DTCMRAM",

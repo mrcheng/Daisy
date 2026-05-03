@@ -31,8 +31,11 @@ constexpr bool  kSaturationOn     = true;
 constexpr bool  kSaturationPost   = true;
 constexpr float kSaturationDrive  = 0.07f;
 constexpr bool  kTwisterOn        = true;
+constexpr bool  kTwisterPost      = true;
+constexpr float kTwisterMaster    = 1.00f;
 constexpr float kTwisterPull      = 0.35f;
 constexpr float kTwisterRecoverySec = 0.220f;
+constexpr float kTwisterAccent    = 0.30f;
 constexpr float kTwisterStruggle  = 0.32f;
 constexpr float kOutputGain       = 0.70f;
 
@@ -105,21 +108,30 @@ static float Saturate(float sig, float drive)
 
 static float KickiTwister(float sig)
 {
-    if(!kTwisterOn)
+    float twister_master   = Clamp(kTwisterMaster, 0.0f, 2.0f);
+    float twister_pull     = Clamp(kTwisterPull * twister_master, 0.0f, 1.0f);
+    float twister_accent   = Clamp(kTwisterAccent * twister_master, 0.0f, 1.0f);
+    float twister_struggle = Clamp(kTwisterStruggle * twister_master, 0.0f, 1.0f);
+
+    if(!kTwisterOn || twister_pull <= 0.0f)
         return sig;
 
-    float level = fabsf(sig);
+    float level = fabsf(sig) * (1.0f + twister_accent * 1.4f);
     float coeff = level > twister_env ? twister_attack_coeff : twister_release_coeff;
     twister_env = coeff * twister_env + (1.0f - coeff) * level;
 
     float over       = Clamp((twister_env - 0.18f) / 0.82f, 0.0f, 1.0f);
-    float target_sag = over * kTwisterPull * 0.55f;
+    float target_sag = over * twister_pull * 0.55f;
     float sag_rate   = target_sag > twister_sag ? 0.18f : (1.0f - twister_release_coeff);
     twister_sag += (target_sag - twister_sag) * sag_rate;
 
-    float strain = kTwisterStruggle * twister_sag;
-    float dirty  = sig + sinf(sig * 24.0f) * strain * 0.025f;
-    dirty        = Saturate(dirty, strain * 0.35f);
+    float strain = twister_struggle * twister_sag;
+    float dirty  = sig;
+    if(strain > 0.0f)
+    {
+        dirty = sig + sinf(sig * 24.0f) * strain * 0.025f;
+        dirty = Saturate(dirty, strain * 0.35f);
+    }
 
     return dirty * (1.0f - twister_sag);
 }
@@ -167,6 +179,9 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
 
         float sig = osc.Process() * AmpEnvelope();
 
+        if(!kTwisterPost)
+            sig = KickiTwister(sig);
+
         if(kSimpleClipOn)
             sig = HardClip(sig, simple_clip_drive);
         if(kOverdriveOn)
@@ -182,7 +197,8 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
         if(kSaturationOn && kSaturationPost)
             sig = Saturate(sig, saturation_drive);
 
-        sig = KickiTwister(sig);
+        if(kTwisterPost)
+            sig = KickiTwister(sig);
         sig *= kOutputGain;
 
         pitch_env *= pitch_decay;
