@@ -204,6 +204,40 @@
                 </div>
             </div>
 
+            <div class="twister-panel">
+                <div class="twister-header">
+                    <label class="toggle-label" for="twisterOn">
+                        <input id="twisterOn" type="checkbox">
+                        Kicki-Twister
+                    </label>
+                    <span>Daisy-safe sag compressor</span>
+                </div>
+                <div class="twister-controls">
+                    <div class="control">
+                        <label for="twisterPull">Pull</label>
+                        <div class="value-row">
+                            <input id="twisterPull" type="range" min="0" max="1" step="0.01" value="0.35">
+                            <span class="readout" id="twisterPullReadout">0.35</span>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="twisterRecovery">Recovery</label>
+                        <div class="value-row">
+                            <input id="twisterRecovery" type="range" min="0.03" max="0.8" step="0.01" value="0.22">
+                            <span class="readout" id="twisterRecoveryReadout">220 ms</span>
+                        </div>
+                    </div>
+                    <div class="control">
+                        <label for="twisterStruggle">Struggle</label>
+                        <div class="value-row">
+                            <input id="twisterStruggle" type="range" min="0" max="1" step="0.01" value="0.32">
+                            <span class="readout" id="twisterStruggleReadout">0.32</span>
+                        </div>
+                    </div>
+                </div>
+                <canvas class="twister-canvas" id="twisterCanvas" width="720" height="150" aria-label="Kicki-Twister waveform response"></canvas>
+            </div>
+
             <div class="section-heading">Good Vibrations</div>
             <p class="section-helper">The gritty shit that will make Kicki Danielsson vibrate</p>
             <div class="control macro-control">
@@ -397,6 +431,9 @@
             cutoff: document.querySelector("#cutoff"),
             resonance: document.querySelector("#resonance"),
             masterDist: document.querySelector("#masterDist"),
+            twisterPull: document.querySelector("#twisterPull"),
+            twisterRecovery: document.querySelector("#twisterRecovery"),
+            twisterStruggle: document.querySelector("#twisterStruggle"),
             simpleClipDrive: document.querySelector("#simpleClipDrive"),
             overdriveDrive: document.querySelector("#overdriveDrive"),
             wavefolderDrive: document.querySelector("#wavefolderDrive"),
@@ -407,6 +444,7 @@
         };
 
         const toggles = {
+            twisterOn: document.querySelector("#twisterOn"),
             simpleClipOn: document.querySelector("#simpleClipOn"),
             overdriveOn: document.querySelector("#overdriveOn"),
             wavefolderOn: document.querySelector("#wavefolderOn"),
@@ -434,6 +472,7 @@
             rackOledCanvas: document.querySelector("#rackOledCanvas"),
             spectrumCanvas: document.querySelector("#spectrumCanvas"),
             scopeCanvas: document.querySelector("#scopeCanvas"),
+            twisterCanvas: document.querySelector("#twisterCanvas"),
             scopeHold: document.querySelector("#scopeHold"),
             scopeHoldReadout: document.querySelector("#scopeHoldReadout"),
             rackMasterDistKnob: document.querySelector("#rackMasterDistKnob"),
@@ -487,6 +526,9 @@
             "cutoff",
             "resonance",
             "masterDist",
+            "twisterPull",
+            "twisterRecovery",
+            "twisterStruggle",
             "simpleClipDrive",
             "overdriveDrive",
             "wavefolderDrive",
@@ -524,6 +566,10 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.07,
+                    twisterOn: true,
+                    twisterPull: 0.35,
+                    twisterRecovery: 0.22,
+                    twisterStruggle: 0.32,
                     gain: 0.7,
                     bpm: 80,
                 },
@@ -550,6 +596,10 @@
                     saturationOn: true,
                     saturationPost: false,
                     saturationDrive: 0.14,
+                    twisterOn: true,
+                    twisterPull: 0.28,
+                    twisterRecovery: 0.18,
+                    twisterStruggle: 0.24,
                     gain: 0.68,
                     bpm: 92,
                 },
@@ -576,6 +626,10 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.18,
+                    twisterOn: true,
+                    twisterPull: 0.48,
+                    twisterRecovery: 0.16,
+                    twisterStruggle: 0.52,
                     gain: 0.62,
                     bpm: 128,
                 },
@@ -602,6 +656,10 @@
                     saturationOn: true,
                     saturationPost: true,
                     saturationDrive: 0.05,
+                    twisterOn: false,
+                    twisterPull: 0.22,
+                    twisterRecovery: 0.36,
+                    twisterStruggle: 0.14,
                     gain: 0.72,
                     bpm: 72,
                 },
@@ -628,6 +686,10 @@
                     saturationOn: true,
                     saturationPost: false,
                     saturationDrive: 0.2,
+                    twisterOn: true,
+                    twisterPull: 0.42,
+                    twisterRecovery: 0.31,
+                    twisterStruggle: 0.38,
                     gain: 0.64,
                     bpm: 105,
                 },
@@ -654,6 +716,10 @@
                     saturationOn: false,
                     saturationPost: true,
                     saturationDrive: 0.1,
+                    twisterOn: true,
+                    twisterPull: 0.55,
+                    twisterRecovery: 0.09,
+                    twisterStruggle: 0.68,
                     gain: 0.55,
                     bpm: 150,
                 },
@@ -1119,6 +1185,10 @@
                 cutoff: value("cutoff"),
                 resonance: value("resonance"),
                 masterDist: value("masterDist"),
+                twisterOn: checked("twisterOn"),
+                twisterPull: value("twisterPull"),
+                twisterRecovery: value("twisterRecovery"),
+                twisterStruggle: value("twisterStruggle"),
                 simpleClipOn: checked("simpleClipOn"),
                 simpleClipDrive: value("simpleClipDrive"),
                 overdriveOn: checked("overdriveOn"),
@@ -1178,6 +1248,9 @@
                 cutoff: "cutoff",
                 resonance: "resonance",
                 masterDist: "masterDist",
+                twisterPull: "twisterPull",
+                twisterRecovery: "twisterRecovery",
+                twisterStruggle: "twisterStruggle",
                 simpleClipDrive: "simpleClipDrive",
                 overdriveDrive: "overdriveDrive",
                 wavefolderDrive: "wavefolderDrive",
@@ -1453,6 +1526,10 @@
                 "constexpr bool  kSaturationOn     = " + String(settings.saturationOn) + ";",
                 "constexpr bool  kSaturationPost   = " + String(settings.saturationPost) + ";",
                 "constexpr float kSaturationDrive  = " + settings.saturationDrive.toFixed(2) + "f;",
+                "constexpr bool  kTwisterOn        = " + String(settings.twisterOn) + ";",
+                "constexpr float kTwisterPull      = " + settings.twisterPull.toFixed(2) + "f;",
+                "constexpr float kTwisterRecoverySec = " + settings.twisterRecovery.toFixed(3) + "f;",
+                "constexpr float kTwisterStruggle  = " + settings.twisterStruggle.toFixed(2) + "f;",
                 "constexpr float kOutputGain       = " + settings.gain.toFixed(2) + "f;",
             ].join("\n");
         }
@@ -1492,6 +1569,9 @@
             document.querySelector("#cutoffReadout").textContent = `${value("cutoff").toFixed(0)} Hz`;
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#masterDistReadout").textContent = `${value("masterDist").toFixed(2)}x`;
+            document.querySelector("#twisterPullReadout").textContent = value("twisterPull").toFixed(2);
+            document.querySelector("#twisterRecoveryReadout").textContent = `${Math.round(value("twisterRecovery") * 1000)} ms`;
+            document.querySelector("#twisterStruggleReadout").textContent = value("twisterStruggle").toFixed(2);
             document.querySelector("#simpleClipDriveReadout").textContent = value("simpleClipDrive").toFixed(2);
             document.querySelector("#overdriveDriveReadout").textContent = value("overdriveDrive").toFixed(2);
             document.querySelector("#wavefolderDriveReadout").textContent = value("wavefolderDrive").toFixed(2);
@@ -1500,6 +1580,7 @@
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
             updateRackMasterDistKnob();
             drawRackOled();
+            drawTwisterWaveform();
             els.saturationPosition.disabled = !checked("saturationOn");
             updateAdsrGraph();
         }
@@ -1897,6 +1978,109 @@
             return Math.sin(sig * (1 + drive * 8) * Math.PI * 0.5);
         }
 
+        function twisterSample(sig, settings, sampleRate, twister) {
+            if(!settings.twisterOn) {
+                return sig;
+            }
+
+            const level = Math.abs(sig);
+            const attackCoeff = twister.attackCoeff ?? Math.exp(-1 / (0.003 * sampleRate));
+            const releaseCoeff = twister.releaseCoeff ?? Math.exp(-1 / (settings.twisterRecovery * sampleRate));
+            const coeff = level > twister.env ? attackCoeff : releaseCoeff;
+            twister.env = coeff * twister.env + (1 - coeff) * level;
+
+            const over = clamp((twister.env - 0.18) / 0.82, 0, 1);
+            const targetSag = over * settings.twisterPull * 0.55;
+            const sagRate = targetSag > twister.sag ? 0.18 : (1 - releaseCoeff);
+            twister.sag += (targetSag - twister.sag) * sagRate;
+
+            const strain = settings.twisterStruggle * twister.sag;
+            const strained = saturate(sig + Math.sin(sig * 24) * strain * 0.025, strain * 0.35);
+            return strained * (1 - twister.sag);
+        }
+
+        function drawTwisterWaveform() {
+            const canvas = els.twisterCanvas;
+            const ctx = canvas.getContext("2d");
+            const pixelRatio = window.devicePixelRatio || 1;
+            const width = Math.max(320, Math.floor(canvas.clientWidth));
+            const height = Math.max(120, Math.floor(canvas.clientHeight));
+            const scaledWidth = Math.floor(width * pixelRatio);
+            const scaledHeight = Math.floor(height * pixelRatio);
+
+            if(canvas.width !== scaledWidth || canvas.height !== scaledHeight) {
+                canvas.width = scaledWidth;
+                canvas.height = scaledHeight;
+            }
+
+            ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = "#fbfcfb";
+            ctx.fillRect(0, 0, width, height);
+
+            const settings = currentSettings();
+            const sampleRate = 48000;
+            const centerY = Math.round(height * 0.5);
+            const amp = height * 0.34;
+            const plotLeft = 18;
+            const plotRight = 12;
+            const plotWidth = width - plotLeft - plotRight;
+            const twister = {
+                env: 0,
+                sag: 0,
+                attackCoeff: Math.exp(-1 / (0.003 * sampleRate)),
+                releaseCoeff: Math.exp(-1 / (settings.twisterRecovery * sampleRate)),
+            };
+            const previewSettings = { ...settings, twisterOn: true };
+            const raw = [];
+            const processed = [];
+
+            for(let x = 0; x < plotWidth; x++) {
+                const t = x / plotWidth;
+                const hit = Math.exp(-t * 5.6);
+                const body = Math.sin(t * Math.PI * 22) * hit;
+                const click = Math.sin(t * Math.PI * 70) * Math.exp(-t * 30) * 0.35;
+                const sig = (body + click) * (0.75 + settings.twisterPull * 0.28);
+                raw.push(sig);
+                processed.push(twisterSample(sig, previewSettings, sampleRate, twister));
+            }
+
+            ctx.strokeStyle = "#d8ddd8";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(plotLeft, centerY);
+            ctx.lineTo(width - plotRight, centerY);
+            ctx.stroke();
+
+            drawWavePath(ctx, raw, plotLeft, centerY, amp, "#aeb5ac", 1.25);
+            drawWavePath(ctx, processed, plotLeft, centerY, amp, "#17685e", 2);
+
+            ctx.fillStyle = "#626a70";
+            ctx.font = "12px system-ui, sans-serif";
+            ctx.textBaseline = "top";
+            ctx.fillText("in", plotLeft, 10);
+            ctx.fillStyle = "#17685e";
+            ctx.fillText("twisted", plotLeft + 28, 10);
+        }
+
+        function drawWavePath(ctx, data, left, centerY, amp, color, lineWidth) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+
+            data.forEach((sample, index) => {
+                const x = left + index;
+                const y = centerY - sample * amp;
+                if(index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+        }
+
         function effectiveDistDrive(settings, drive) {
             return clamp(drive * settings.masterDist, 0, 1);
         }
@@ -1960,6 +2144,12 @@
             const releaseSamples = Math.max(1, Math.round(settings.release * sampleRate));
             const decayEnd = attackSamples + decaySamples;
             const releaseEnd = decayEnd + releaseSamples;
+            const twister = {
+                env: 0,
+                sag: 0,
+                attackCoeff: Math.exp(-1 / (0.003 * sampleRate)),
+                releaseCoeff: Math.exp(-1 / (settings.twisterRecovery * sampleRate)),
+            };
 
             let pitchEnv = 1;
             let phase = 0;
@@ -1987,6 +2177,8 @@
                 if(settings.saturationOn && settings.saturationPost) {
                     sig = saturate(sig, effectiveDistDrive(settings, settings.saturationDrive));
                 }
+
+                sig = twisterSample(sig, settings, sampleRate, twister);
 
                 data[i] = sig * settings.gain;
                 pitchEnv *= pitchDecay;
@@ -2082,6 +2274,7 @@
         controls.bpmNumber.addEventListener("input", () => setBpm(value("bpmNumber")));
         window.addEventListener("resize", () => {
             updateAdsrGraph();
+            drawTwisterWaveform();
             drawSpectrumAnalyzer();
             drawOscilloscope();
         });

@@ -1,14 +1,14 @@
 window.KICKI_MEMORY_REPORT = {
     "target": "KickiDanielsson",
-    "generatedAt": "2026-05-03T16:36:32+02:00",
+    "generatedAt": "2026-05-03T18:25:06+02:00",
     "regions": [
         {
             "name": "FLASH",
-            "usedBytes": 77276,
+            "usedBytes": 77676,
             "totalBytes": 131072,
-            "used": "75.5 KB",
+            "used": "75.9 KB",
             "total": "128 KB",
-            "percent": 58.96
+            "percent": 59.26
         },
         {
             "name": "DTCMRAM",
@@ -20,11 +20,11 @@ window.KICKI_MEMORY_REPORT = {
         },
         {
             "name": "SRAM",
-            "usedBytes": 12804,
+            "usedBytes": 12820,
             "totalBytes": 524288,
             "used": "12.5 KB",
             "total": "512 KB",
-            "percent": 2.44
+            "percent": 2.45
         },
         {
             "name": "RAM_D2",

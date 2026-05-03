@@ -30,6 +30,10 @@ constexpr float kWavefolderDrive  = 0.04f;
 constexpr bool  kSaturationOn     = true;
 constexpr bool  kSaturationPost   = true;
 constexpr float kSaturationDrive  = 0.07f;
+constexpr bool  kTwisterOn        = true;
+constexpr float kTwisterPull      = 0.35f;
+constexpr float kTwisterRecoverySec = 0.220f;
+constexpr float kTwisterStruggle  = 0.32f;
 constexpr float kOutputGain       = 0.70f;
 
 // Reserved for a future 10k pot: 3V3 -> pot -> GND, wiper to Daisy Seed A0/D15.
@@ -40,6 +44,10 @@ constexpr float kMasterDistMax         = 2.00f;
 
 float pitch_env;
 float pitch_decay;
+float twister_env;
+float twister_sag;
+float twister_attack_coeff;
+float twister_release_coeff;
 uint32_t env_sample;
 uint32_t attack_samples;
 uint32_t decay_samples;
@@ -93,6 +101,27 @@ static float Saturate(float sig, float drive)
 {
     float driven = sig * (1.0f + drive * 20.0f);
     return driven / (1.0f + fabsf(driven));
+}
+
+static float KickiTwister(float sig)
+{
+    if(!kTwisterOn)
+        return sig;
+
+    float level = fabsf(sig);
+    float coeff = level > twister_env ? twister_attack_coeff : twister_release_coeff;
+    twister_env = coeff * twister_env + (1.0f - coeff) * level;
+
+    float over       = Clamp((twister_env - 0.18f) / 0.82f, 0.0f, 1.0f);
+    float target_sag = over * kTwisterPull * 0.55f;
+    float sag_rate   = target_sag > twister_sag ? 0.18f : (1.0f - twister_release_coeff);
+    twister_sag += (target_sag - twister_sag) * sag_rate;
+
+    float strain = kTwisterStruggle * twister_sag;
+    float dirty  = sig + sinf(sig * 24.0f) * strain * 0.025f;
+    dirty        = Saturate(dirty, strain * 0.35f);
+
+    return dirty * (1.0f - twister_sag);
 }
 
 static float MasterDistMultiplier()
@@ -153,6 +182,7 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
         if(kSaturationOn && kSaturationPost)
             sig = Saturate(sig, saturation_drive);
 
+        sig = KickiTwister(sig);
         sig *= kOutputGain;
 
         pitch_env *= pitch_decay;
@@ -189,6 +219,10 @@ int main(void)
     wavefolder.SetOffset(0.0f);
 
     pitch_decay    = expf(-1.0f / (kPitchDecaySec * sample_rate));
+    twister_env    = 0.0f;
+    twister_sag    = 0.0f;
+    twister_attack_coeff = expf(-1.0f / (0.003f * sample_rate));
+    twister_release_coeff = expf(-1.0f / (kTwisterRecoverySec * sample_rate));
     attack_samples = static_cast<uint32_t>(kAttackSec * sample_rate);
     decay_samples  = static_cast<uint32_t>(kAmpDecaySec * sample_rate);
     release_samples = static_cast<uint32_t>(kReleaseSec * sample_rate);
