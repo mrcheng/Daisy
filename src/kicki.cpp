@@ -10,26 +10,33 @@ Oscillator osc;
 Svf        lowpass;
 Overdrive  overdrive;
 Wavefolder wavefolder;
+AnalogControl master_dist_knob;
 
-constexpr float kBaseFreqHz       = 56.0f;
-constexpr float kPitchAmountHz    = 112.0f;
-constexpr float kPitchDecaySec    = 0.055f;
-constexpr float kAttackSec        = 0.004f;
-constexpr float kAmpDecaySec      = 0.360f;
-constexpr float kSustainLevel     = 0.04f;
-constexpr float kReleaseSec       = 0.060f;
-constexpr float kLowpassCutoffHz  = 760.0f;
-constexpr float kResonance        = 0.62f;
-constexpr bool  kSimpleClipOn     = false;
-constexpr float kSimpleClipDrive  = 0.25f;
-constexpr bool  kOverdriveOn      = false;
-constexpr float kOverdriveDrive   = 0.35f;
-constexpr bool  kWavefolderOn     = false;
-constexpr float kWavefolderDrive  = 0.20f;
-constexpr bool  kSaturationOn     = false;
-constexpr bool  kSaturationPost   = false;
-constexpr float kSaturationDrive  = 0.35f;
+constexpr float kBaseFreqHz       = 40.0f;
+constexpr float kPitchAmountHz    = 186.0f;
+constexpr float kPitchDecaySec    = 0.045f;
+constexpr float kAttackSec        = 0.007f;
+constexpr float kAmpDecaySec      = 0.070f;
+constexpr float kSustainLevel     = 0.75f;
+constexpr float kReleaseSec       = 0.120f;
+constexpr float kLowpassCutoffHz  = 790.0f;
+constexpr float kResonance        = 0.78f;
+constexpr bool  kSimpleClipOn     = true;
+constexpr float kSimpleClipDrive  = 0.02f;
+constexpr bool  kOverdriveOn      = true;
+constexpr float kOverdriveDrive   = 0.01f;
+constexpr bool  kWavefolderOn     = true;
+constexpr float kWavefolderDrive  = 0.04f;
+constexpr bool  kSaturationOn     = true;
+constexpr bool  kSaturationPost   = true;
+constexpr float kSaturationDrive  = 0.07f;
 constexpr float kOutputGain       = 0.70f;
+
+// Reserved for a future 10k pot: 3V3 -> pot -> GND, wiper to Daisy Seed A0/D15.
+constexpr bool  kMasterDistKnobEnabled = false;
+constexpr Pin   kMasterDistKnobPin     = seed::A0;
+constexpr float kMasterDistMin         = 0.10f;
+constexpr float kMasterDistMax         = 2.00f;
 
 float pitch_env;
 float pitch_decay;
@@ -88,10 +95,42 @@ static float Saturate(float sig, float drive)
     return driven / (1.0f + fabsf(driven));
 }
 
+static float MasterDistMultiplier()
+{
+    if(!kMasterDistKnobEnabled)
+        return 1.0f;
+
+    float knob = master_dist_knob.Process();
+    return kMasterDistMin + knob * (kMasterDistMax - kMasterDistMin);
+}
+
+static void InitMasterDistKnob(float control_rate)
+{
+    if(!kMasterDistKnobEnabled)
+        return;
+
+    AdcChannelConfig adc_cfg[1];
+    adc_cfg[0].InitSingle(kMasterDistKnobPin);
+    hw.adc.Init(adc_cfg, 1);
+    master_dist_knob.Init(hw.adc.GetPtr(0), control_rate);
+    hw.adc.Start();
+}
+
 static void AudioCallback(AudioHandle::InputBuffer  in,
                           AudioHandle::OutputBuffer out,
                           size_t                    size)
 {
+    float master_dist      = MasterDistMultiplier();
+    float simple_clip_drive = Clamp(kSimpleClipDrive * master_dist, 0.0f, 1.0f);
+    float overdrive_drive   = Clamp(kOverdriveDrive * master_dist, 0.0f, 1.0f);
+    float wavefolder_drive  = Clamp(kWavefolderDrive * master_dist, 0.0f, 1.0f);
+    float saturation_drive  = Clamp(kSaturationDrive * master_dist, 0.0f, 1.0f);
+
+    if(kOverdriveOn)
+        overdrive.SetDrive(overdrive_drive);
+    if(kWavefolderOn)
+        wavefolder.SetGain(1.0f + wavefolder_drive * 8.0f);
+
     for(size_t i = 0; i < size; i++)
     {
         float freq = kBaseFreqHz + (kPitchAmountHz * pitch_env);
@@ -100,19 +139,19 @@ static void AudioCallback(AudioHandle::InputBuffer  in,
         float sig = osc.Process() * AmpEnvelope();
 
         if(kSimpleClipOn)
-            sig = HardClip(sig, kSimpleClipDrive);
+            sig = HardClip(sig, simple_clip_drive);
         if(kOverdriveOn)
             sig = overdrive.Process(sig);
         if(kWavefolderOn)
             sig = wavefolder.Process(sig);
         if(kSaturationOn && !kSaturationPost)
-            sig = Saturate(sig, kSaturationDrive);
+            sig = Saturate(sig, saturation_drive);
 
         lowpass.Process(sig);
         sig = lowpass.Low();
 
         if(kSaturationOn && kSaturationPost)
-            sig = Saturate(sig, kSaturationDrive);
+            sig = Saturate(sig, saturation_drive);
 
         sig *= kOutputGain;
 
@@ -129,6 +168,7 @@ int main(void)
     hw.Configure();
     hw.Init();
     hw.SetAudioBlockSize(4);
+    InitMasterDistKnob(hw.AudioCallbackRate());
 
     float sample_rate = hw.AudioSampleRate();
 

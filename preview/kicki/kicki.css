@@ -49,12 +49,221 @@ h1 {
     text-align: right;
 }
 
+.instrument-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
 .surface {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: 8px;
     padding: 20px;
     box-shadow: 0 8px 24px rgba(18, 24, 31, 0.08);
+}
+
+.eurorack-panel {
+    position: sticky;
+    top: 20px;
+    display: grid;
+    gap: 12px;
+    min-height: calc(100vh - 104px);
+    padding: 14px;
+    background: #e7e9e3;
+}
+
+.rack-rail {
+    height: 18px;
+    border: 1px solid #b9bfb6;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #f6f7f4 0%, #cfd4cc 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.eurorack-faceplate {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 24px;
+    min-height: 620px;
+    padding: 46px 28px 44px;
+    border: 1px solid #aeb5ac;
+    border-radius: 6px;
+    background: linear-gradient(180deg, #f7f8f3 0%, #e1e5df 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75);
+}
+
+.rack-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text);
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+}
+
+.rack-led {
+    --rack-led-opacity: 0.28;
+    --rack-led-glow-size: 2px;
+    --rack-led-glow-spread: 0px;
+    --rack-led-glow-alpha: 0.1;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    border: 1px solid #8d2b26;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.95) 0%, rgba(255, 156, 143, 0.92) 18%, rgba(194, 26, 20, 0.96) 50%, rgba(85, 10, 10, 0.98) 100%);
+    box-shadow:
+        0 0 var(--rack-led-glow-size) var(--rack-led-glow-spread) rgba(226, 34, 28, var(--rack-led-glow-alpha)),
+        inset 0 1px 1px rgba(255, 255, 255, 0.6);
+    opacity: var(--rack-led-opacity);
+}
+
+.rack-screw {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #9da59c;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff 0%, #c5cbc2 52%, #8f978d 100%);
+}
+
+.rack-screw::after {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: 3px;
+    width: 10px;
+    height: 2px;
+    border-radius: 999px;
+    background: #6f766e;
+}
+
+.rack-screw-top-left {
+    top: 18px;
+    left: 18px;
+}
+
+.rack-screw-top-right {
+    top: 18px;
+    right: 18px;
+}
+
+.rack-screw-bottom-left {
+    bottom: 18px;
+    left: 18px;
+}
+
+.rack-screw-bottom-right {
+    right: 18px;
+    bottom: 18px;
+}
+
+.rack-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    align-content: center;
+    justify-items: center;
+}
+
+.rack-control,
+.jack {
+    display: grid;
+    justify-items: center;
+    gap: 9px;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 750;
+    text-transform: uppercase;
+}
+
+.rack-masterdist {
+    position: relative;
+    width: min(320px, 100%);
+    min-height: 250px;
+    align-content: center;
+}
+
+.rack-knob-scale {
+    position: relative;
+    width: min(250px, 100%);
+    aspect-ratio: 1;
+}
+
+.rack-vibration-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(250px, 100%);
+    margin-top: -18px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.rack-vibration-row span:first-child {
+    text-align: left;
+}
+
+.rack-vibration-row span:last-child {
+    color: var(--accent-dark);
+    text-align: right;
+}
+
+.rack-knob {
+    --rack-knob-angle: -7deg;
+    width: min(124px, 24vw);
+    aspect-ratio: 1;
+    border: 1px solid #1f2424;
+    border-radius: 50%;
+    background:
+        linear-gradient(90deg, transparent 48%, rgba(255, 255, 255, 0.78) 48%, rgba(255, 255, 255, 0.78) 52%, transparent 52%) 50% 12% / 42% 42% no-repeat,
+        radial-gradient(circle at 35% 30%, #4d5553 0%, #1d2222 58%, #070808 100%);
+    box-shadow: 0 8px 14px rgba(20, 24, 23, 0.22);
+    cursor: ns-resize;
+    touch-action: none;
+    transform: rotate(var(--rack-knob-angle));
+}
+
+.rack-knob:focus-visible {
+    outline: 3px solid rgba(23, 104, 94, 0.28);
+    outline-offset: 5px;
+}
+
+.rack-masterdist > .rack-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -62px;
+    margin-left: -62px;
+}
+
+.jack-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.jack-hole {
+    width: 34px;
+    aspect-ratio: 1;
+    border: 1px solid #2d3332;
+    border-radius: 50%;
+    background: radial-gradient(circle, #111 0%, #111 34%, #626a66 36%, #d6dbd3 68%, #989f96 100%);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.jack-muted {
+    opacity: 0.45;
 }
 
 .section-heading {
@@ -89,6 +298,10 @@ h1 {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 16px;
+}
+
+.kick-panel .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .compact-grid {
@@ -251,7 +464,7 @@ select:disabled {
 
 .adsr-controls {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
 }
 
@@ -549,6 +762,21 @@ button {
     display: none;
 }
 
+@media (max-width: 980px) {
+    .instrument-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .eurorack-panel {
+        position: static;
+        min-height: 0;
+    }
+
+    .eurorack-faceplate {
+        min-height: 520px;
+    }
+}
+
 @media (max-width: 760px) {
     header {
         align-items: start;
@@ -559,12 +787,21 @@ button {
         text-align: left;
     }
 
-    .grid {
+    .grid,
+    .kick-panel .grid {
         grid-template-columns: 1fr;
     }
 
     .adsr-controls {
         grid-template-columns: 1fr;
+    }
+
+    .rack-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .jack-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .memory-row {

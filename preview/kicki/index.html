@@ -15,7 +15,63 @@
             <div class="status" id="status">Ready</div>
         </header>
 
-        <section class="surface" aria-label="Bassdrum controls">
+        <div class="instrument-layout">
+        <aside class="surface eurorack-panel" aria-label="Eurorack control area">
+            <div class="rack-rail"></div>
+            <div class="eurorack-faceplate">
+                <div class="rack-screw rack-screw-top-left"></div>
+                <div class="rack-screw rack-screw-top-right"></div>
+                <div class="rack-title">
+                    <span>Kicki Danielsson</span>
+                    <span class="rack-led" id="rackLed" aria-hidden="true"></span>
+                </div>
+
+                <div class="rack-grid">
+                    <div class="rack-control rack-masterdist">
+                        <div class="rack-knob-scale" aria-hidden="true"></div>
+                        <div
+                            class="rack-knob"
+                            id="rackMasterDistKnob"
+                            role="slider"
+                            tabindex="0"
+                            aria-label="Masterdist"
+                            aria-valuemin="0.1"
+                            aria-valuemax="2"
+                            aria-valuenow="1"
+                        ></div>
+                        <div class="rack-vibration-row" aria-hidden="true">
+                            <span>Bad vibrations</span>
+                            <span>Good vibrations</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="jack-row" aria-hidden="true">
+                    <div class="jack">
+                        <div class="jack-hole"></div>
+                        <span>Trig</span>
+                    </div>
+                    <div class="jack">
+                        <div class="jack-hole"></div>
+                        <span>Out</span>
+                    </div>
+                    <div class="jack">
+                        <div class="jack-hole jack-muted"></div>
+                        <span>CV A</span>
+                    </div>
+                    <div class="jack">
+                        <div class="jack-hole jack-muted"></div>
+                        <span>CV B</span>
+                    </div>
+                </div>
+
+                <div class="rack-screw rack-screw-bottom-left"></div>
+                <div class="rack-screw rack-screw-bottom-right"></div>
+            </div>
+            <div class="rack-rail"></div>
+        </aside>
+
+        <section class="surface kick-panel" aria-label="Bassdrum controls">
             <div class="section-heading">Basic Settings</div>
             <div class="grid">
                 <div class="control">
@@ -248,6 +304,7 @@
                 <input id="presetFile" type="file" accept=".kicki,application/json">
             </div>
         </section>
+        </div>
     </main>
 
     <script src="memory-report.js"></script>
@@ -268,6 +325,7 @@
             scopeHoldTime: 0,
             scopeHoldMs: 0,
             vuLevel: 0,
+            rackLedLevel: 0,
             repeatTimer: null,
             repeatMs: 750,
             tapTimes: [],
@@ -323,6 +381,8 @@
             scopeCanvas: document.querySelector("#scopeCanvas"),
             scopeHold: document.querySelector("#scopeHold"),
             scopeHoldReadout: document.querySelector("#scopeHoldReadout"),
+            rackMasterDistKnob: document.querySelector("#rackMasterDistKnob"),
+            rackLed: document.querySelector("#rackLed"),
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
             saturationPosition: document.querySelector("#saturationPosition"),
@@ -344,13 +404,6 @@
         const SPECTRUM_LOW_HZ = 500;
         const SPECTRUM_LOW_WIDTH = 0.75;
         const SCOPE_TRIGGER_THRESHOLD = 0.015;
-
-        const distortionDriveIds = [
-            "simpleClipDrive",
-            "overdriveDrive",
-            "wavefolderDrive",
-            "saturationDrive",
-        ];
 
         const randomizableControlIds = [
             "baseFreq",
@@ -421,6 +474,7 @@
                 }
 
                 state.vuLevel = Math.max(rms, state.vuLevel * 0.9);
+                state.rackLedLevel = Math.max(peak, state.rackLedLevel * 0.88);
 
                 const vuPercent = Math.min(100, state.vuLevel * 170);
                 const peakPercent = Math.min(100, peak * 100);
@@ -429,6 +483,7 @@
                 els.vuFill.style.width = `${vuPercent}%`;
                 els.vuPeak.style.left = `${peakPercent}%`;
                 els.vuReadout.textContent = db;
+                updateRackLed();
                 updateScopeHold(peak);
                 drawSpectrumAnalyzer();
                 drawOscilloscope();
@@ -437,6 +492,14 @@
             };
 
             state.meterFrame = requestAnimationFrame(tick);
+        }
+
+        function updateRackLed() {
+            const level = clamp(state.rackLedLevel * 1.35, 0, 1);
+            els.rackLed.style.setProperty("--rack-led-opacity", (0.28 + level * 0.72).toFixed(3));
+            els.rackLed.style.setProperty("--rack-led-glow-size", `${2 + level * 16}px`);
+            els.rackLed.style.setProperty("--rack-led-glow-spread", `${level * 5}px`);
+            els.rackLed.style.setProperty("--rack-led-glow-alpha", (0.1 + level * 0.72).toFixed(3));
         }
 
         function drawSpectrumAnalyzer() {
@@ -948,8 +1011,59 @@
             document.querySelector("#saturationDriveReadout").textContent = value("saturationDrive").toFixed(2);
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
+            updateRackMasterDistKnob();
             els.saturationPosition.disabled = !checked("saturationOn");
             updateAdsrGraph();
+        }
+
+        function updateRackMasterDistKnob() {
+            const min = Number(controls.masterDist.min);
+            const max = Number(controls.masterDist.max);
+            const current = value("masterDist");
+            const normalized = (current - min) / (max - min);
+            const angle = -135 + clamp(normalized, 0, 1) * 270;
+
+            els.rackMasterDistKnob.style.setProperty("--rack-knob-angle", `${angle}deg`);
+            els.rackMasterDistKnob.setAttribute("aria-valuenow", current.toFixed(2));
+        }
+
+        function setMasterDistFromRack(nextValue) {
+            setControl("masterDist", nextValue);
+            controls.masterDist.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+
+        function setupRackMasterDistKnob() {
+            let startY = 0;
+            let startValue = 0;
+
+            els.rackMasterDistKnob.addEventListener("pointerdown", (event) => {
+                event.preventDefault();
+                startY = event.clientY;
+                startValue = value("masterDist");
+                els.rackMasterDistKnob.setPointerCapture(event.pointerId);
+            });
+
+            els.rackMasterDistKnob.addEventListener("pointermove", (event) => {
+                if(!els.rackMasterDistKnob.hasPointerCapture(event.pointerId)) {
+                    return;
+                }
+
+                const min = Number(controls.masterDist.min);
+                const max = Number(controls.masterDist.max);
+                const dragRangePx = 180;
+                const delta = ((startY - event.clientY) / dragRangePx) * (max - min);
+                setMasterDistFromRack(startValue + delta);
+            });
+
+            els.rackMasterDistKnob.addEventListener("keydown", (event) => {
+                if(event.key !== "ArrowUp" && event.key !== "ArrowRight" && event.key !== "ArrowDown" && event.key !== "ArrowLeft") {
+                    return;
+                }
+
+                event.preventDefault();
+                const direction = event.key === "ArrowUp" || event.key === "ArrowRight" ? 1 : -1;
+                setMasterDistFromRack(value("masterDist") + direction * Number(controls.masterDist.step));
+            });
         }
 
         function startRepeat() {
@@ -1250,33 +1364,6 @@
             });
         }
 
-        function scaleDistortionControls(nextMaster) {
-            const previousMaster = Math.max(0.01, state.distMaster);
-            const requestedRatio = nextMaster / previousMaster;
-            let ratio = requestedRatio;
-
-            if(requestedRatio > 1) {
-                const headrooms = distortionDriveIds
-                    .map((id) => {
-                        const current = value(id);
-                        const max = Number(controls[id].max);
-                        return current > 0 ? max / current : Number.POSITIVE_INFINITY;
-                    })
-                    .filter((headroom) => Number.isFinite(headroom));
-
-                if(headrooms.length > 0) {
-                    ratio = Math.min(requestedRatio, Math.min(...headrooms));
-                }
-            }
-
-            distortionDriveIds.forEach((id) => {
-                setControl(id, value(id) * ratio);
-            });
-
-            state.distMaster = previousMaster * ratio;
-            setControl("masterDist", state.distMaster);
-        }
-
         function hardClip(sig, drive) {
             const driven = sig * (1 + drive * 16);
             return Math.max(-1, Math.min(1, driven));
@@ -1291,18 +1378,22 @@
             return Math.sin(sig * (1 + drive * 8) * Math.PI * 0.5);
         }
 
+        function effectiveDistDrive(settings, drive) {
+            return clamp(drive * settings.masterDist, 0, 1);
+        }
+
         function applyPreFilterDistortion(sig, settings) {
             if(settings.simpleClipOn) {
-                sig = hardClip(sig, settings.simpleClipDrive);
+                sig = hardClip(sig, effectiveDistDrive(settings, settings.simpleClipDrive));
             }
             if(settings.overdriveOn) {
-                sig = saturate(sig, settings.overdriveDrive);
+                sig = saturate(sig, effectiveDistDrive(settings, settings.overdriveDrive));
             }
             if(settings.wavefolderOn) {
-                sig = fold(sig, settings.wavefolderDrive);
+                sig = fold(sig, effectiveDistDrive(settings, settings.wavefolderDrive));
             }
             if(settings.saturationOn && !settings.saturationPost) {
-                sig = saturate(sig, settings.saturationDrive);
+                sig = saturate(sig, effectiveDistDrive(settings, settings.saturationDrive));
             }
 
             return sig;
@@ -1375,7 +1466,7 @@
                 sig = svf.process(sig);
 
                 if(settings.saturationOn && settings.saturationPost) {
-                    sig = saturate(sig, settings.saturationDrive);
+                    sig = saturate(sig, effectiveDistDrive(settings, settings.saturationDrive));
                 }
 
                 data[i] = sig * settings.gain;
@@ -1448,10 +1539,7 @@
 
         Object.values(controls).forEach((control) => {
             control.addEventListener("input", () => {
-                if(control === controls.masterDist) {
-                    scaleDistortionControls(value("masterDist"));
-                }
-
+                state.distMaster = value("masterDist");
                 updateReadouts();
                 updateFirmwareValues();
                 saveSettings();
@@ -1482,6 +1570,7 @@
         setupAdsrDrag(els.adsrAttackHandle, "attack");
         setupAdsrDrag(els.adsrDecayHandle, "decay");
         setupAdsrDrag(els.adsrReleaseHandle, "release");
+        setupRackMasterDistKnob();
         setupRangeSteppers();
 
         els.trigger.addEventListener("click", triggerKick);
