@@ -214,11 +214,11 @@
                 <div class="scope" aria-label="Output oscilloscope">
                     <div class="scope-header">
                         <span>Oscilloscope</span>
-                        <span id="scopeHoldReadout">0.9s hold</span>
+                        <span id="scopeHoldReadout">0.0s hold</span>
                     </div>
                     <div class="scope-control" aria-label="Oscilloscope hold fade length">
                         <span>Hold</span>
-                        <input id="scopeHold" type="range" min="0" max="10" step="0.1" value="0.9">
+                        <input id="scopeHold" type="range" min="0" max="10" step="0.1" value="0.0">
                     </div>
                     <canvas class="scope-canvas" id="scopeCanvas" width="720" height="140"></canvas>
                 </div>
@@ -262,8 +262,11 @@
             meterData: null,
             spectrumData: null,
             scopeHoldData: null,
+            scopeHoldEnergy: null,
+            scopeHoldFrames: 0,
+            scopeActive: false,
             scopeHoldTime: 0,
-            scopeHoldMs: 900,
+            scopeHoldMs: 0,
             vuLevel: 0,
             repeatTimer: null,
             repeatMs: 750,
@@ -385,6 +388,7 @@
                 state.meterData = new Float32Array(state.analyser.fftSize);
                 state.spectrumData = new Uint8Array(state.analyser.frequencyBinCount);
                 state.scopeHoldData = new Float32Array(state.analyser.fftSize);
+                state.scopeHoldEnergy = new Float32Array(state.analyser.fftSize);
 
                 state.master.connect(state.analyser);
                 state.analyser.connect(state.audio.destination);
@@ -550,11 +554,30 @@
         }
 
         function updateScopeHold(peak) {
-            if(state.scopeHoldMs <= 0 || !state.scopeHoldData || !state.meterData || peak < SCOPE_TRIGGER_THRESHOLD) {
+            if(state.scopeHoldMs <= 0 || !state.scopeHoldData || !state.scopeHoldEnergy || !state.meterData) {
                 return;
             }
 
-            state.scopeHoldData.set(state.meterData);
+            if(peak < SCOPE_TRIGGER_THRESHOLD) {
+                state.scopeActive = false;
+                return;
+            }
+
+            if(!state.scopeActive) {
+                state.scopeHoldData.fill(0);
+                state.scopeHoldEnergy.fill(0);
+                state.scopeHoldFrames = 0;
+                state.scopeActive = true;
+            }
+
+            state.scopeHoldFrames += 1;
+            const frameWeight = 1 / state.scopeHoldFrames;
+            for(let i = 0; i < state.meterData.length; i++) {
+                const sample = state.meterData[i];
+                state.scopeHoldData[i] += (sample - state.scopeHoldData[i]) * frameWeight;
+                state.scopeHoldEnergy[i] += (sample * sample - state.scopeHoldEnergy[i]) * frameWeight;
+            }
+
             state.scopeHoldTime = performance.now();
         }
 
@@ -617,8 +640,14 @@
                 const holdAlpha = clamp(1 - holdAge / state.scopeHoldMs, 0, 1);
 
                 if(holdAlpha > 0) {
+                    if(state.scopeHoldEnergy) {
+                        ctx.fillStyle = "#17685e";
+                        ctx.globalAlpha = 0.08 + holdAlpha * 0.18;
+                        drawScopeEnergy(ctx, state.scopeHoldEnergy, plotLeft, plotWidth, centerY, plotHeight);
+                    }
+
                     ctx.strokeStyle = "#0f4f48";
-                    ctx.lineWidth = 2.25;
+                    ctx.lineWidth = 2;
                     ctx.globalAlpha = 0.22 + holdAlpha * 0.78;
                     drawScopeTrace(ctx, state.scopeHoldData, plotLeft, plotWidth, centerY, plotHeight);
                 }
@@ -646,6 +675,33 @@
             ctx.stroke();
         }
 
+        function drawScopeEnergy(ctx, energy, plotLeft, plotWidth, centerY, plotHeight) {
+            ctx.beginPath();
+
+            for(let x = 0; x < plotWidth; x++) {
+                const sampleIndex = Math.floor((x / Math.max(1, plotWidth - 1)) * (energy.length - 1));
+                const level = clamp(Math.sqrt(energy[sampleIndex]), 0, 1);
+                const y = centerY - level * plotHeight * 0.45;
+                const drawX = plotLeft + x;
+
+                if(x === 0) {
+                    ctx.moveTo(drawX, y);
+                } else {
+                    ctx.lineTo(drawX, y);
+                }
+            }
+
+            for(let x = plotWidth - 1; x >= 0; x--) {
+                const sampleIndex = Math.floor((x / Math.max(1, plotWidth - 1)) * (energy.length - 1));
+                const level = clamp(Math.sqrt(energy[sampleIndex]), 0, 1);
+                const y = centerY + level * plotHeight * 0.45;
+                ctx.lineTo(plotLeft + x, y);
+            }
+
+            ctx.closePath();
+            ctx.fill();
+        }
+
         function updateScopeHoldLength() {
             const seconds = Number(els.scopeHold.value);
             state.scopeHoldMs = seconds * 1000;
@@ -653,6 +709,7 @@
 
             if(seconds === 0) {
                 state.scopeHoldTime = 0;
+                state.scopeActive = false;
             }
         }
 
