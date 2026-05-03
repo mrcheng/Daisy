@@ -22,9 +22,14 @@
                 <div class="rack-screw rack-screw-top-left"></div>
                 <div class="rack-screw rack-screw-top-right"></div>
                 <div class="rack-title">
-                    <span>Kicki Danielsson</span>
-                    <span class="rack-led" id="rackLed" aria-hidden="true"></span>
-                    <button class="rack-help-button" id="rackLedHelp" type="button" aria-label="Show LED wiring instructions">?</button>
+                    <div class="rack-title-copy">
+                        <span>Kicki Danielsson</span>
+                        <small>Den systemhotande bastrumman</small>
+                    </div>
+                    <div class="rack-title-tools">
+                        <span class="rack-led" id="rackLed" aria-hidden="true"></span>
+                        <button class="rack-help-button" id="rackLedHelp" type="button" aria-label="Show LED wiring instructions">?</button>
+                    </div>
                 </div>
 
                 <div class="rack-oled" aria-label="128 pixel wide monochrome OLED display simulator">
@@ -66,22 +71,16 @@
                     <button class="rack-preset-button" type="button" data-preset-slot="5">Näbbaz</button>
                 </div>
 
-                <div class="jack-row" aria-hidden="true">
+                <div class="jack-row" aria-label="Panel jacks">
                     <div class="jack">
                         <div class="jack-hole"></div>
                         <span>Trig</span>
+                        <button class="rack-help-button jack-help" id="rackTrigHelp" type="button" aria-label="Show trigger input jack wiring instructions">?</button>
                     </div>
                     <div class="jack">
                         <div class="jack-hole"></div>
                         <span>Out</span>
-                    </div>
-                    <div class="jack">
-                        <div class="jack-hole jack-muted"></div>
-                        <span>CV A</span>
-                    </div>
-                    <div class="jack">
-                        <div class="jack-hole jack-muted"></div>
-                        <span>CV B</span>
+                        <button class="rack-help-button jack-help" id="rackOutHelp" type="button" aria-label="Show audio output jack wiring instructions">?</button>
                     </div>
                 </div>
 
@@ -443,6 +442,8 @@
             rackLedHelp: document.querySelector("#rackLedHelp"),
             rackOledHelp: document.querySelector("#rackOledHelp"),
             rackPresetHelp: document.querySelector("#rackPresetHelp"),
+            rackTrigHelp: document.querySelector("#rackTrigHelp"),
+            rackOutHelp: document.querySelector("#rackOutHelp"),
             hardwareModal: document.querySelector("#hardwareModal"),
             hardwareModalBackdrop: document.querySelector("#hardwareModalBackdrop"),
             hardwareModalTitle: document.querySelector("#hardwareModalTitle"),
@@ -703,6 +704,28 @@
                     "Connect OLED SCL to the Daisy Seed I2C clock pin you reserve in firmware.",
                     "Connect OLED SDA to the matching Daisy Seed I2C data pin.",
                     "The browser OLED is currently visual-only. Firmware still needs an SSD1306 display object, I2C pin config, and a small screen update routine."
+                ],
+            },
+            trig: {
+                title: "Trig jack wiring",
+                steps: [
+                    "Parts: one 3.5mm mono jack socket, jumper wires, and a breadboard.",
+                    "Connect the jack sleeve to Daisy Seed GND.",
+                    "Connect the jack tip to a free Daisy Seed digital input pin reserved for trigger input.",
+                    "Use the Daisy internal pull-down or pull-up mode in firmware, matching the trigger circuit you choose.",
+                    "Keep incoming trigger and gate signals within the Daisy Seed 0V to 3V3 input range.",
+                    "The browser Trig jack is currently visual-only. Firmware still needs a GPIO trigger input that calls TriggerKick() on a rising edge."
+                ],
+            },
+            out: {
+                title: "Out jack wiring",
+                steps: [
+                    "Parts: one 3.5mm mono jack socket, jumper wires, and optionally a small series resistor.",
+                    "Connect the jack sleeve to Daisy Seed GND.",
+                    "Connect the jack tip to one Daisy Seed audio output channel.",
+                    "The current firmware writes the same kick signal to both Daisy Seed audio outputs, so either output channel can feed a mono Out jack.",
+                    "Do not connect the output directly to a speaker. Use a mixer, audio interface, amp input, or eurorack output circuit.",
+                    "Keep kOutputGain conservative in src/kicki.cpp if the output clips downstream."
                 ],
             },
         };
@@ -2092,6 +2115,8 @@
         els.rackOledHelp.addEventListener("click", () => openHardwareModal("oled"));
         els.rackMasterDistHelp.addEventListener("click", () => openHardwareModal("masterdist"));
         els.rackPresetHelp.addEventListener("click", () => openHardwareModal("buttons"));
+        els.rackTrigHelp.addEventListener("click", () => openHardwareModal("trig"));
+        els.rackOutHelp.addEventListener("click", () => openHardwareModal("out"));
         els.hardwareModalClose.addEventListener("click", closeHardwareModal);
         els.hardwareModalBackdrop.addEventListener("click", closeHardwareModal);
         document.addEventListener("keydown", (event) => {

@@ -101,15 +101,49 @@ h1 {
 }
 
 .rack-title {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
+    gap: 10px;
     color: var(--text);
+    text-align: center;
+}
+
+.rack-title-copy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+    padding-left: 34px;
+}
+
+.rack-title-copy span {
     font-size: 26px;
     font-weight: 800;
     line-height: 1;
-    text-align: center;
+}
+
+.rack-title-copy small {
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    text-transform: uppercase;
+}
+
+.rack-title-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: end;
+}
+
+.rack-title-tools .rack-help-button {
+    flex: 0 0 auto;
+}
+
+.rack-title-tools .rack-led {
+    flex: 0 0 auto;
 }
 
 .rack-led {
@@ -240,9 +274,9 @@ h1 {
 .jack {
     display: grid;
     justify-items: center;
-    gap: 9px;
+    gap: 4px;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 750;
     text-transform: uppercase;
 }
@@ -385,8 +419,17 @@ h1 {
 
 .jack-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(2, minmax(0, 72px));
+    justify-content: center;
+    gap: 28px;
+}
+
+.jack-help {
+    width: 18px;
+    min-width: 18px;
+    height: 18px;
+    min-height: 18px;
+    font-size: 10px;
 }
 
 .jack-hole {
