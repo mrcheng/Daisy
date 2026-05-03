@@ -419,6 +419,51 @@ button {
     background: #f9faf8;
 }
 
+.scope {
+    display: grid;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.scope-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.scope-header span:last-child {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+}
+
+.scope-control {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.scope-control input {
+    width: 100%;
+}
+
+.scope-canvas {
+    display: block;
+    width: 100%;
+    height: 140px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #f9faf8;
+}
+
 .memory {
     margin-top: 20px;
     display: grid;

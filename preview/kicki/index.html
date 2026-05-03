@@ -211,6 +211,17 @@
                     </div>
                     <canvas class="spectrum-canvas" id="spectrumCanvas" width="720" height="160"></canvas>
                 </div>
+                <div class="scope" aria-label="Output oscilloscope">
+                    <div class="scope-header">
+                        <span>Oscilloscope</span>
+                        <span id="scopeHoldReadout">0.9s hold</span>
+                    </div>
+                    <div class="scope-control" aria-label="Oscilloscope hold fade length">
+                        <span>Hold</span>
+                        <input id="scopeHold" type="range" min="0" max="10" step="0.1" value="0.9">
+                    </div>
+                    <canvas class="scope-canvas" id="scopeCanvas" width="720" height="140"></canvas>
+                </div>
             </div>
 
             <div class="memory" aria-label="Daisy Seed memory usage">
@@ -250,6 +261,9 @@
             meterFrame: null,
             meterData: null,
             spectrumData: null,
+            scopeHoldData: null,
+            scopeHoldTime: 0,
+            scopeHoldMs: 900,
             vuLevel: 0,
             repeatTimer: null,
             repeatMs: 750,
@@ -303,6 +317,9 @@
             vuPeak: document.querySelector("#vuPeak"),
             vuReadout: document.querySelector("#vuReadout"),
             spectrumCanvas: document.querySelector("#spectrumCanvas"),
+            scopeCanvas: document.querySelector("#scopeCanvas"),
+            scopeHold: document.querySelector("#scopeHold"),
+            scopeHoldReadout: document.querySelector("#scopeHoldReadout"),
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
             saturationPosition: document.querySelector("#saturationPosition"),
@@ -323,6 +340,7 @@
         const SPECTRUM_BAR_COUNT = 96;
         const SPECTRUM_LOW_HZ = 500;
         const SPECTRUM_LOW_WIDTH = 0.75;
+        const SCOPE_TRIGGER_THRESHOLD = 0.015;
 
         const distortionDriveIds = [
             "simpleClipDrive",
@@ -366,6 +384,7 @@
                 state.analyser.smoothingTimeConstant = 0.72;
                 state.meterData = new Float32Array(state.analyser.fftSize);
                 state.spectrumData = new Uint8Array(state.analyser.frequencyBinCount);
+                state.scopeHoldData = new Float32Array(state.analyser.fftSize);
 
                 state.master.connect(state.analyser);
                 state.analyser.connect(state.audio.destination);
@@ -406,7 +425,9 @@
                 els.vuFill.style.width = `${vuPercent}%`;
                 els.vuPeak.style.left = `${peakPercent}%`;
                 els.vuReadout.textContent = db;
+                updateScopeHold(peak);
                 drawSpectrumAnalyzer();
+                drawOscilloscope();
 
                 state.meterFrame = requestAnimationFrame(tick);
             };
@@ -526,6 +547,113 @@
 
             const highPosition = (clampedX - SPECTRUM_LOW_WIDTH) / (1 - SPECTRUM_LOW_WIDTH);
             return SPECTRUM_LOW_HZ * Math.exp(highPosition * Math.log(SPECTRUM_MAX_HZ / SPECTRUM_LOW_HZ));
+        }
+
+        function updateScopeHold(peak) {
+            if(state.scopeHoldMs <= 0 || !state.scopeHoldData || !state.meterData || peak < SCOPE_TRIGGER_THRESHOLD) {
+                return;
+            }
+
+            state.scopeHoldData.set(state.meterData);
+            state.scopeHoldTime = performance.now();
+        }
+
+        function drawOscilloscope() {
+            const canvas = els.scopeCanvas;
+            const ctx = canvas.getContext("2d");
+            const pixelRatio = window.devicePixelRatio || 1;
+            const width = Math.max(320, Math.floor(canvas.clientWidth));
+            const height = Math.max(110, Math.floor(canvas.clientHeight));
+            const scaledWidth = Math.floor(width * pixelRatio);
+            const scaledHeight = Math.floor(height * pixelRatio);
+
+            if(canvas.width !== scaledWidth || canvas.height !== scaledHeight) {
+                canvas.width = scaledWidth;
+                canvas.height = scaledHeight;
+            }
+
+            ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+
+            const plotTop = 12;
+            const plotRight = 10;
+            const plotBottom = height - 12;
+            const plotLeft = 10;
+            const plotWidth = width - plotLeft - plotRight;
+            const plotHeight = plotBottom - plotTop;
+            const centerY = plotTop + plotHeight / 2;
+
+            ctx.fillStyle = "#f9faf8";
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = "#d8ddd8";
+            ctx.lineWidth = 1;
+            for(let i = 0; i <= 4; i++) {
+                const y = plotTop + (plotHeight * i) / 4;
+                ctx.beginPath();
+                ctx.moveTo(plotLeft, y);
+                ctx.lineTo(width - plotRight, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = "#aeb7b2";
+            ctx.beginPath();
+            ctx.moveTo(plotLeft, centerY);
+            ctx.lineTo(width - plotRight, centerY);
+            ctx.stroke();
+
+            const samples = state.meterData;
+            if(!samples) {
+                return;
+            }
+
+            ctx.strokeStyle = "#17685e";
+            ctx.lineWidth = 1.25;
+            ctx.globalAlpha = 0.35;
+            drawScopeTrace(ctx, samples, plotLeft, plotWidth, centerY, plotHeight);
+
+            if(state.scopeHoldMs > 0 && state.scopeHoldData && state.scopeHoldTime > 0) {
+                const holdAge = performance.now() - state.scopeHoldTime;
+                const holdAlpha = clamp(1 - holdAge / state.scopeHoldMs, 0, 1);
+
+                if(holdAlpha > 0) {
+                    ctx.strokeStyle = "#0f4f48";
+                    ctx.lineWidth = 2.25;
+                    ctx.globalAlpha = 0.22 + holdAlpha * 0.78;
+                    drawScopeTrace(ctx, state.scopeHoldData, plotLeft, plotWidth, centerY, plotHeight);
+                }
+            }
+
+            ctx.globalAlpha = 1;
+        }
+
+        function drawScopeTrace(ctx, samples, plotLeft, plotWidth, centerY, plotHeight) {
+            ctx.beginPath();
+
+            for(let x = 0; x < plotWidth; x++) {
+                const sampleIndex = Math.floor((x / Math.max(1, plotWidth - 1)) * (samples.length - 1));
+                const sample = clamp(samples[sampleIndex], -1, 1);
+                const y = centerY - sample * plotHeight * 0.45;
+                const drawX = plotLeft + x;
+
+                if(x === 0) {
+                    ctx.moveTo(drawX, y);
+                } else {
+                    ctx.lineTo(drawX, y);
+                }
+            }
+
+            ctx.stroke();
+        }
+
+        function updateScopeHoldLength() {
+            const seconds = Number(els.scopeHold.value);
+            state.scopeHoldMs = seconds * 1000;
+            els.scopeHoldReadout.textContent = `${seconds.toFixed(1)}s hold`;
+
+            if(seconds === 0) {
+                state.scopeHoldTime = 0;
+            }
         }
 
         function value(id) {
@@ -1291,6 +1419,7 @@
         window.addEventListener("resize", () => {
             updateAdsrGraph();
             drawSpectrumAnalyzer();
+            drawOscilloscope();
         });
 
         setupAdsrDrag(els.adsrAttackHandle, "attack");
@@ -1309,12 +1438,15 @@
         els.stop.addEventListener("click", stopRepeat);
         els.randomize.addEventListener("click", randomizeParameters);
         els.randomizeWithoutAdsr.addEventListener("click", () => randomizeParameters(true));
+        els.scopeHold.addEventListener("input", updateScopeHoldLength);
 
         loadSettings();
+        updateScopeHoldLength();
         updateReadouts();
         updateFirmwareValues();
         renderMemoryReport();
         drawSpectrumAnalyzer();
+        drawOscilloscope();
     </script>
 </body>
 </html>
