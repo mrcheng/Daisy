@@ -27,6 +27,11 @@
                     <button class="rack-help-button" id="rackLedHelp" type="button" aria-label="Show LED wiring instructions">?</button>
                 </div>
 
+                <div class="rack-oled" aria-label="128 pixel wide monochrome OLED display simulator">
+                    <button class="rack-help-button rack-oled-help" id="rackOledHelp" type="button" aria-label="Show OLED display installation instructions">?</button>
+                    <canvas id="rackOledCanvas" width="128" height="62"></canvas>
+                </div>
+
                 <div class="rack-grid">
                     <div class="rack-control rack-masterdist">
                         <div class="rack-knob-scale" aria-hidden="true"></div>
@@ -90,7 +95,12 @@
             <div class="preset-memory" aria-label="Compile fixed drum memory">
                 <div class="preset-memory-header">
                     <span>Drum Memory</span>
-                    <button class="secondary" id="presetSaveMode" type="button">Save to preset</button>
+                    <div class="preset-memory-actions">
+                        <button class="secondary" id="presetSaveMode" type="button">Save to preset</button>
+                        <button class="secondary" id="exportSlotPreset" type="button">Export slot</button>
+                        <button class="secondary" id="importSlotPreset" type="button">Import slot</button>
+                        <input id="slotPresetFile" type="file" accept=".kicki,application/json">
+                    </div>
                 </div>
                 <div class="preset-memory-grid">
                     <button type="button" data-preset-slot="0">Soda</button>
@@ -349,6 +359,7 @@
     </div>
 
     <script src="memory-report.js"></script>
+    <script src="oled.js"></script>
     <script>
         const STORAGE_KEY = "kicki-danielsson-preview-v1";
 
@@ -421,6 +432,7 @@
             vuFill: document.querySelector("#vuFill"),
             vuPeak: document.querySelector("#vuPeak"),
             vuReadout: document.querySelector("#vuReadout"),
+            rackOledCanvas: document.querySelector("#rackOledCanvas"),
             spectrumCanvas: document.querySelector("#spectrumCanvas"),
             scopeCanvas: document.querySelector("#scopeCanvas"),
             scopeHold: document.querySelector("#scopeHold"),
@@ -429,6 +441,7 @@
             rackMasterDistHelp: document.querySelector("#rackMasterDistHelp"),
             rackLed: document.querySelector("#rackLed"),
             rackLedHelp: document.querySelector("#rackLedHelp"),
+            rackOledHelp: document.querySelector("#rackOledHelp"),
             rackPresetHelp: document.querySelector("#rackPresetHelp"),
             hardwareModal: document.querySelector("#hardwareModal"),
             hardwareModalBackdrop: document.querySelector("#hardwareModalBackdrop"),
@@ -436,6 +449,9 @@
             hardwareModalBody: document.querySelector("#hardwareModalBody"),
             hardwareModalClose: document.querySelector("#hardwareModalClose"),
             presetSaveMode: document.querySelector("#presetSaveMode"),
+            exportSlotPreset: document.querySelector("#exportSlotPreset"),
+            importSlotPreset: document.querySelector("#importSlotPreset"),
+            slotPresetFile: document.querySelector("#slotPresetFile"),
             presetSlotButtons: Array.from(document.querySelectorAll("[data-preset-slot]")),
             memoryGrid: document.querySelector("#memoryGrid"),
             memoryTime: document.querySelector("#memoryTime"),
@@ -677,6 +693,18 @@
                     "Recommended future mapping: Soda, Wiks, Cain, Mejje, Roew, and Näbbaz each get one dedicated GPIO pin."
                 ],
             },
+            oled: {
+                title: "128x64 OLED installation",
+                steps: [
+                    "Parts: one 128x64 monochrome I2C OLED module, jumper wires, and a breadboard.",
+                    "Use an SSD1306-compatible display when possible, because it matches common Daisy/libDaisy examples.",
+                    "Connect OLED GND to Daisy Seed GND.",
+                    "Connect OLED VCC to Daisy Seed 3V3 unless your module explicitly requires 5V.",
+                    "Connect OLED SCL to the Daisy Seed I2C clock pin you reserve in firmware.",
+                    "Connect OLED SDA to the matching Daisy Seed I2C data pin.",
+                    "The browser OLED is currently visual-only. Firmware still needs an SSD1306 display object, I2C pin config, and a small screen update routine."
+                ],
+            },
         };
 
         function getAudio() {
@@ -734,6 +762,7 @@
                 els.vuPeak.style.left = `${peakPercent}%`;
                 els.vuReadout.textContent = db;
                 updateRackLed();
+                drawRackOled();
                 updateScopeHold(peak);
                 drawSpectrumAnalyzer();
                 drawOscilloscope();
@@ -750,6 +779,19 @@
             els.rackLed.style.setProperty("--rack-led-glow-size", `${2 + level * 16}px`);
             els.rackLed.style.setProperty("--rack-led-glow-spread", `${level * 5}px`);
             els.rackLed.style.setProperty("--rack-led-glow-alpha", (0.1 + level * 0.72).toFixed(3));
+        }
+
+        function drawRackOled() {
+            const settings = currentSettings();
+            const slot = state.presetBank?.[state.activePresetIndex];
+
+            window.KickiOled.drawRackOled({
+                canvas: els.rackOledCanvas,
+                level: state.rackLedLevel,
+                masterDist: settings.masterDist,
+                maxMasterDist: Number(controls.masterDist.max),
+                presetName: slot?.name || PRESET_SLOT_NAMES[state.activePresetIndex],
+            });
         }
 
         function drawSpectrumAnalyzer() {
@@ -1253,6 +1295,77 @@
             loadPresetSlot(index);
         }
 
+        function activePresetSlot() {
+            if(!state.presetBank) {
+                state.presetBank = clonePresetBank(COMPILED_PRESET_BANK);
+            }
+
+            return state.presetBank[state.activePresetIndex];
+        }
+
+        function downloadJson(filename, data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+
+            link.href = url;
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function exportActivePresetSlot() {
+            const slot = activePresetSlot();
+            const preset = {
+                format: "kicki-drum",
+                version: 1,
+                name: slot.name,
+                savedAt: new Date().toISOString(),
+                settings: cloneSettings(slot.settings),
+            };
+
+            downloadJson(`Kicki-${slot.name}.kicki`, preset);
+            els.status.textContent = `Exported ${slot.name}`;
+        }
+
+        async function importPresetSlotFile(file) {
+            if(!file) {
+                return;
+            }
+
+            try {
+                const preset = JSON.parse(await file.text());
+                let settings = null;
+
+                if(preset.format === "kicki-drum") {
+                    settings = preset.settings;
+                } else if(preset.format === "kicki" && preset.settings) {
+                    settings = preset.settings;
+                } else if(!preset.format) {
+                    settings = preset.settings || preset;
+                } else {
+                    throw new Error("Unsupported preset format");
+                }
+
+                if(!settings || typeof settings !== "object") {
+                    throw new Error("Missing drum settings");
+                }
+
+                const slotName = PRESET_SLOT_NAMES[state.activePresetIndex];
+                state.presetBank[state.activePresetIndex] = {
+                    name: slotName,
+                    settings: cloneSettings(settings),
+                };
+                applySettings(settings, true);
+                updatePresetButtons();
+                els.status.textContent = `Imported ${file.name} into ${slotName}`;
+            } catch(error) {
+                els.status.textContent = "Could not import drum";
+            }
+
+            els.slotPresetFile.value = "";
+        }
+
         function savePresetFile() {
             const preset = {
                 format: "kicki",
@@ -1263,14 +1376,7 @@
                 activePresetIndex: state.activePresetIndex,
                 presets: presetBankPayload(),
             };
-            const blob = new Blob([JSON.stringify(preset, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download = "KickiDanielsson.kicki";
-            link.click();
-            URL.revokeObjectURL(url);
+            downloadJson("KickiDanielsson.kicki", preset);
             els.status.textContent = "Saved .kicki preset";
         }
 
@@ -1370,6 +1476,7 @@
             document.querySelector("#gainReadout").textContent = value("gain").toFixed(2);
             els.tempoReadout.textContent = `${bpmFromRepeatMs()} BPM`;
             updateRackMasterDistKnob();
+            drawRackOled();
             els.saturationPosition.disabled = !checked("saturationOn");
             updateAdsrGraph();
         }
@@ -1975,10 +2082,14 @@
         els.randomizeWithoutAdsr.addEventListener("click", () => randomizeParameters(true));
         els.scopeHold.addEventListener("input", updateScopeHoldLength);
         els.presetSaveMode.addEventListener("click", () => setPresetSaveMode(!state.presetSaveArmed));
+        els.exportSlotPreset.addEventListener("click", exportActivePresetSlot);
+        els.importSlotPreset.addEventListener("click", () => els.slotPresetFile.click());
+        els.slotPresetFile.addEventListener("change", () => importPresetSlotFile(els.slotPresetFile.files[0]));
         els.presetSlotButtons.forEach((button) => {
             button.addEventListener("click", () => handlePresetSlot(Number(button.dataset.presetSlot)));
         });
         els.rackLedHelp.addEventListener("click", () => openHardwareModal("led"));
+        els.rackOledHelp.addEventListener("click", () => openHardwareModal("oled"));
         els.rackMasterDistHelp.addEventListener("click", () => openHardwareModal("masterdist"));
         els.rackPresetHelp.addEventListener("click", () => openHardwareModal("buttons"));
         els.hardwareModalClose.addEventListener("click", closeHardwareModal);
@@ -1994,6 +2105,7 @@
         updateReadouts();
         updateFirmwareValues();
         renderMemoryReport();
+        drawRackOled();
         drawSpectrumAnalyzer();
         drawOscilloscope();
     </script>

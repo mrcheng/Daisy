@@ -8,6 +8,8 @@
     --accent: #17685e;
     --accent-dark: #0f4f48;
     --warn: #9b3c36;
+    --rack-width: 380px;
+    --rack-height: 760px;
 }
 
 * {
@@ -51,7 +53,7 @@ h1 {
 
 .instrument-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: var(--rack-width) minmax(0, 1fr);
     gap: 20px;
     align-items: start;
 }
@@ -68,8 +70,11 @@ h1 {
     position: sticky;
     top: 20px;
     display: grid;
+    grid-template-rows: 18px minmax(0, 1fr) 18px;
     gap: 12px;
-    min-height: calc(100vh - 104px);
+    width: var(--rack-width);
+    height: var(--rack-height);
+    min-height: 0;
     padding: 14px;
     background: #e7e9e3;
 }
@@ -85,10 +90,10 @@ h1 {
 .eurorack-faceplate {
     position: relative;
     display: grid;
-    grid-template-rows: auto 1fr auto;
-    gap: 24px;
-    min-height: 620px;
-    padding: 46px 28px 44px;
+    grid-template-rows: auto auto minmax(145px, 1fr) auto auto auto;
+    gap: 14px;
+    min-height: 0;
+    padding: 42px 24px 38px;
     border: 1px solid #aeb5ac;
     border-radius: 6px;
     background: linear-gradient(180deg, #f7f8f3 0%, #e1e5df 100%);
@@ -152,6 +157,37 @@ h1 {
     color: var(--accent-dark);
 }
 
+.rack-oled {
+    position: relative;
+    align-self: start;
+    justify-self: center;
+    width: min(280px, 100%);
+    margin: 0 auto;
+    padding: 10px;
+    border: 1px solid #151719;
+    border-radius: 6px;
+    background: #171c1b;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 5px 12px rgba(20, 24, 23, 0.18);
+}
+
+.rack-oled canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 128 / 62;
+    border: 1px solid #020605;
+    border-radius: 2px;
+    background: #020605;
+    image-rendering: pixelated;
+}
+
+.rack-oled-help {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    z-index: 1;
+}
+
 .rack-screw {
     position: absolute;
     width: 16px;
@@ -195,7 +231,7 @@ h1 {
 .rack-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: 28px;
+    gap: 18px;
     align-content: center;
     justify-items: center;
 }
@@ -214,22 +250,22 @@ h1 {
 .rack-masterdist {
     position: relative;
     width: min(320px, 100%);
-    min-height: 250px;
+    min-height: 145px;
     align-content: center;
 }
 
 .rack-knob-scale {
     position: relative;
-    width: min(250px, 100%);
+    width: 125px;
     aspect-ratio: 1;
 }
 
 .rack-vibration-row {
     display: flex;
     justify-content: space-between;
-    gap: 18px;
-    width: min(250px, 100%);
-    margin-top: -18px;
+    gap: 10px;
+    width: 150px;
+    margin-top: -8px;
     color: var(--muted);
     font-size: 11px;
     font-weight: 800;
@@ -248,7 +284,7 @@ h1 {
 
 .rack-knob {
     --rack-knob-angle: -7deg;
-    width: min(124px, 24vw);
+    width: 62px;
     aspect-ratio: 1;
     border: 1px solid #1f2424;
     border-radius: 50%;
@@ -270,14 +306,14 @@ h1 {
     position: absolute;
     top: 50%;
     left: 50%;
-    margin-top: -62px;
-    margin-left: -62px;
+    margin-top: -31px;
+    margin-left: -31px;
 }
 
 .rack-knob-help {
     position: absolute;
-    top: 54px;
-    right: 48px;
+    top: 30px;
+    right: 78px;
 }
 
 .rack-preset-header {
@@ -285,7 +321,7 @@ h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-bottom: -14px;
+    margin-bottom: -6px;
     color: var(--muted);
     font-size: 11px;
     font-weight: 800;
@@ -296,21 +332,21 @@ h1 {
 .rack-preset-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 10px;
+    gap: 7px;
 }
 
 .rack-preset-button {
     display: grid;
-    grid-template-rows: 34px auto;
+    grid-template-rows: 22px auto;
     place-items: center;
-    gap: 6px;
-    min-height: 64px;
+    gap: 4px;
+    min-height: 42px;
     border: 1px solid #8f978d;
-    border-radius: 6px;
+    border-radius: 5px;
     background: linear-gradient(180deg, #fefefe 0%, #c7cec4 100%);
     color: var(--text);
-    padding: 8px 6px 7px;
-    font-size: 11px;
+    padding: 5px 4px 4px;
+    font-size: 9px;
     font-weight: 800;
     text-transform: uppercase;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 2px 0 rgba(80, 88, 82, 0.3);
@@ -318,8 +354,8 @@ h1 {
 
 .rack-preset-button::before {
     content: "";
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
     border: 1px solid #59615a;
     border-radius: 50%;
     background:
@@ -350,11 +386,11 @@ h1 {
 .jack-row {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    gap: 8px;
 }
 
 .jack-hole {
-    width: 34px;
+    width: 26px;
     aspect-ratio: 1;
     border: 1px solid #2d3332;
     border-radius: 50%;
@@ -409,6 +445,23 @@ h1 {
     font-size: 13px;
     font-weight: 750;
     text-transform: uppercase;
+}
+
+.preset-memory-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.preset-memory-actions input[type="file"] {
+    display: none;
+}
+
+.preset-memory-actions button {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 12px;
 }
 
 .preset-memory-header button.active {
@@ -982,15 +1035,12 @@ button {
 @media (max-width: 980px) {
     .instrument-layout {
         grid-template-columns: 1fr;
+        justify-items: center;
     }
 
     .eurorack-panel {
         position: static;
-        min-height: 0;
-    }
-
-    .eurorack-faceplate {
-        min-height: 520px;
+        justify-self: center;
     }
 }
 
