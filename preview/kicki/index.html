@@ -68,6 +68,7 @@
                             aria-valuemax="2"
                             aria-valuenow="1"
                         ></div>
+                        <button class="rack-help-button rack-knob-help" id="rackTwisterHelp" type="button" aria-label="Show Sloppy/Twisted knob wiring instructions">?</button>
                         <div class="rack-vibration-row" aria-hidden="true">
                             <span>Sloppy</span>
                             <span>Twisted</span>
@@ -544,6 +545,7 @@
             rackMasterDistKnob: document.querySelector("#rackMasterDistKnob"),
             rackTwisterKnob: document.querySelector("#rackTwisterKnob"),
             rackMasterDistHelp: document.querySelector("#rackMasterDistHelp"),
+            rackTwisterHelp: document.querySelector("#rackTwisterHelp"),
             rackLed: document.querySelector("#rackLed"),
             rackLedHelp: document.querySelector("#rackLedHelp"),
             rackOledHelp: document.querySelector("#rackOledHelp"),
@@ -849,6 +851,18 @@
                     "Connect the other outside leg to Daisy Seed GND.",
                     "Connect the middle wiper leg to Daisy Seed A0 / D15.",
                     "This firmware is already prepared for A0 / D15. After wiring, set kMasterDistKnobEnabled to true in src/kicki.cpp."
+                ],
+            },
+            twisterknob: {
+                title: "Sloppy/Twisted knob wiring",
+                steps: [
+                    "Parts: one 10k linear potentiometer, jumper wires, and a breadboard.",
+                    "Place the potentiometer on the breadboard so its three legs are on separate rows.",
+                    "Connect one outside leg to Daisy Seed 3V3.",
+                    "Connect the other outside leg to Daisy Seed GND.",
+                    "Connect the middle wiper leg to a free Daisy Seed analog input.",
+                    "Map that analog input to Master Kicki-Twister in firmware so left is Sloppy and right is Twisted.",
+                    "If the direction feels backwards, swap the two outside potentiometer legs."
                 ],
             },
             buttons: {
@@ -2570,6 +2584,7 @@
         els.rackLedHelp.addEventListener("click", () => openHardwareModal("led"));
         els.rackOledHelp.addEventListener("click", () => openHardwareModal("oled"));
         els.rackMasterDistHelp.addEventListener("click", () => openHardwareModal("masterdist"));
+        els.rackTwisterHelp.addEventListener("click", () => openHardwareModal("twisterknob"));
         els.rackPresetHelp.addEventListener("click", () => openHardwareModal("buttons"));
         els.rackTrigHelp.addEventListener("click", () => openHardwareModal("trig"));
         els.rackOutHelp.addEventListener("click", () => openHardwareModal("out"));
