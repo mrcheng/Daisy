@@ -193,12 +193,24 @@ The preview lets you:
 - Watch the real browser output VU meter.
 - Watch the latest Daisy Seed memory usage from `preview/kicki/memory-report.js`.
 - Print the current settings as C++ firmware constants.
+- Inspect the interactive breadboard/build overview for Daisy Seed wiring.
 
 Use this for fast listening and parameter experiments. When a sound is worth keeping, copy the matching values into `src/kicki.cpp`, build with `make`, and flash with `make program-dfu`.
 
 The preview is close enough for design work, but the Daisy Seed hardware is still the final sound reference. DaisySP `Overdrive`, `Wavefolder`, and `Svf` are approximated in JavaScript.
 
 The preview remembers your current settings in the browser. Click `Print Firmware Values` to generate the `constexpr` lines that should replace the matching constants near the top of `src/kicki.cpp`. Browser BPM/repeat is only for auditioning and is not burned into the Daisy firmware.
+
+The preview also includes a `Build Overview` section with a sitewide Daisy Seed and breadboard wiring chart. Click a component or wire in the diagram to see what it connects to and whether that part is already supported in firmware or still needs firmware work. The current planned module wiring is:
+
+- `A0 / D15`: Masterdist potentiometer.
+- `A1 / D16`: Sloppy/Twisted Master Kicki-Twister potentiometer.
+- `D2-D7`: Six preset buttons.
+- `D8`: Trigger input jack.
+- `D11`: OLED I2C SCL.
+- `D12`: OLED I2C SDA.
+- `D13`: Activity LED through a resistor.
+- `OUT1`: Main mono audio output jack.
 
 For the fastest path:
 

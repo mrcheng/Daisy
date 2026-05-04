@@ -28,12 +28,10 @@
                     </div>
                     <div class="rack-title-tools">
                         <span class="rack-led" id="rackLed" aria-hidden="true"></span>
-                        <button class="rack-help-button" id="rackLedHelp" type="button" aria-label="Show LED wiring instructions">?</button>
                     </div>
                 </div>
 
                 <div class="rack-oled" aria-label="128 pixel wide monochrome OLED display simulator">
-                    <button class="rack-help-button rack-oled-help" id="rackOledHelp" type="button" aria-label="Show OLED display installation instructions">?</button>
                     <canvas id="rackOledCanvas" width="128" height="62"></canvas>
                 </div>
 
@@ -50,7 +48,6 @@
                             aria-valuemax="2"
                             aria-valuenow="1"
                         ></div>
-                        <button class="rack-help-button rack-knob-help" id="rackMasterDistHelp" type="button" aria-label="Show Masterdist knob wiring instructions">?</button>
                         <div class="rack-vibration-row" aria-hidden="true">
                             <span>Bad vibrations</span>
                             <span>Good vibrations</span>
@@ -68,7 +65,6 @@
                             aria-valuemax="2"
                             aria-valuenow="1"
                         ></div>
-                        <button class="rack-help-button rack-knob-help" id="rackTwisterHelp" type="button" aria-label="Show Sloppy/Twisted knob wiring instructions">?</button>
                         <div class="rack-vibration-row" aria-hidden="true">
                             <span>Sloppy</span>
                             <span>Twisted</span>
@@ -78,7 +74,6 @@
 
                 <div class="rack-preset-header">
                     <span>Memory</span>
-                    <button class="rack-help-button" id="rackPresetHelp" type="button" aria-label="Show preset button wiring instructions">?</button>
                 </div>
                 <div class="rack-preset-grid" aria-label="Preset pushbuttons">
                     <button class="rack-preset-button" type="button" data-preset-slot="0">Soda</button>
@@ -93,12 +88,10 @@
                     <div class="jack">
                         <div class="jack-hole"></div>
                         <span>Trig</span>
-                        <button class="rack-help-button jack-help" id="rackTrigHelp" type="button" aria-label="Show trigger input jack wiring instructions">?</button>
                     </div>
                     <div class="jack">
                         <div class="jack-hole"></div>
                         <span>Out</span>
-                        <button class="rack-help-button jack-help" id="rackOutHelp" type="button" aria-label="Show audio output jack wiring instructions">?</button>
                     </div>
                 </div>
 
@@ -489,14 +482,14 @@
                             <circle cx="670" cy="410" r="5"></circle>
                             <text class="pin-label" x="462" y="191">3V3</text>
                             <text class="pin-label" x="462" y="229">GND</text>
-                            <text class="pin-label" x="462" y="281">SCL</text>
-                            <text class="pin-label" x="462" y="309">SDA</text>
+                            <text class="pin-label" x="462" y="281">D11/SCL</text>
+                            <text class="pin-label" x="462" y="309">D12/SDA</text>
                             <text class="pin-label" x="462" y="351">A0/D15</text>
-                            <text class="pin-label" x="462" y="389">A1?</text>
-                            <text class="pin-label pin-right" x="658" y="233">LED</text>
+                            <text class="pin-label" x="462" y="389">A1/D16</text>
+                            <text class="pin-label pin-right" x="658" y="233">D13 LED</text>
                             <text class="pin-label pin-right" x="658" y="323">D2-D7</text>
-                            <text class="pin-label pin-right" x="658" y="367">TRIG</text>
-                            <text class="pin-label pin-right" x="658" y="413">OUT</text>
+                            <text class="pin-label pin-right" x="658" y="367">D8 TRIG</text>
+                            <text class="pin-label pin-right" x="658" y="413">OUT1</text>
                         </g>
 
                         <g class="wiring-node" data-wiring="oled" tabindex="0" role="button" aria-label="OLED display wiring">
@@ -559,6 +552,7 @@
                 <aside class="wiring-inspector" aria-live="polite">
                     <h2 id="wiringTitle">Daisy Seed overview</h2>
                     <p id="wiringBody">The Daisy Seed sits across the breadboard center gap. Power rails feed shared 3V3 and GND, while each control or jack gets its own signal wire.</p>
+                    <ol class="wiring-steps" id="wiringSteps"></ol>
                     <dl>
                         <div>
                             <dt>Signal</dt>
@@ -573,17 +567,6 @@
             </div>
         </section>
     </main>
-
-    <div class="hardware-modal" id="hardwareModal" hidden>
-        <div class="hardware-modal-backdrop" id="hardwareModalBackdrop"></div>
-        <section class="hardware-modal-card" role="dialog" aria-modal="true" aria-labelledby="hardwareModalTitle">
-            <div class="hardware-modal-header">
-                <h2 id="hardwareModalTitle">Hardware</h2>
-                <button class="hardware-modal-close" id="hardwareModalClose" type="button" aria-label="Close hardware instructions">x</button>
-            </div>
-            <div class="hardware-modal-body" id="hardwareModalBody"></div>
-        </section>
-    </div>
 
     <script src="memory-report.js"></script>
     <script src="oled.js"></script>
@@ -675,21 +658,10 @@
             scopeHoldReadout: document.querySelector("#scopeHoldReadout"),
             rackMasterDistKnob: document.querySelector("#rackMasterDistKnob"),
             rackTwisterKnob: document.querySelector("#rackTwisterKnob"),
-            rackMasterDistHelp: document.querySelector("#rackMasterDistHelp"),
-            rackTwisterHelp: document.querySelector("#rackTwisterHelp"),
             rackLed: document.querySelector("#rackLed"),
-            rackLedHelp: document.querySelector("#rackLedHelp"),
-            rackOledHelp: document.querySelector("#rackOledHelp"),
-            rackPresetHelp: document.querySelector("#rackPresetHelp"),
-            rackTrigHelp: document.querySelector("#rackTrigHelp"),
-            rackOutHelp: document.querySelector("#rackOutHelp"),
-            hardwareModal: document.querySelector("#hardwareModal"),
-            hardwareModalBackdrop: document.querySelector("#hardwareModalBackdrop"),
-            hardwareModalTitle: document.querySelector("#hardwareModalTitle"),
-            hardwareModalBody: document.querySelector("#hardwareModalBody"),
-            hardwareModalClose: document.querySelector("#hardwareModalClose"),
             wiringTitle: document.querySelector("#wiringTitle"),
             wiringBody: document.querySelector("#wiringBody"),
+            wiringSteps: document.querySelector("#wiringSteps"),
             wiringSignal: document.querySelector("#wiringSignal"),
             wiringStatus: document.querySelector("#wiringStatus"),
             wiringTargets: Array.from(document.querySelectorAll("[data-wiring]")),
@@ -966,148 +938,135 @@
             },
         ];
 
-        const hardwareInstructions = {
-            led: {
-                title: "Red LED wiring",
-                steps: [
-                    "Parts: one red LED, one 1k resistor, jumper wires, and a breadboard.",
-                    "Put the LED across the breadboard center gap so each leg is on a different row.",
-                    "Connect the LED cathode, the shorter leg or flat-edge side, to Daisy Seed GND.",
-                    "Connect the LED anode through the 1k resistor to a free Daisy Seed digital pin.",
-                    "Do not connect an LED directly between 3V3 and GND without a resistor.",
-                    "The preview LED is currently visual-only. To make a real LED follow the kick, reserve a pin and add a small firmware LED/PWM output."
-                ],
-            },
-            masterdist: {
-                title: "Masterdist knob wiring",
-                steps: [
-                    "Parts: one 10k linear potentiometer, jumper wires, and a breadboard.",
-                    "Place the potentiometer on the breadboard so its three legs are on separate rows.",
-                    "Connect one outside leg to Daisy Seed 3V3.",
-                    "Connect the other outside leg to Daisy Seed GND.",
-                    "Connect the middle wiper leg to Daisy Seed A0 / D15.",
-                    "This firmware is already prepared for A0 / D15. After wiring, set kMasterDistKnobEnabled to true in src/kicki.cpp."
-                ],
-            },
-            twisterknob: {
-                title: "Sloppy/Twisted knob wiring",
-                steps: [
-                    "Parts: one 10k linear potentiometer, jumper wires, and a breadboard.",
-                    "Place the potentiometer on the breadboard so its three legs are on separate rows.",
-                    "Connect one outside leg to Daisy Seed 3V3.",
-                    "Connect the other outside leg to Daisy Seed GND.",
-                    "Connect the middle wiper leg to a free Daisy Seed analog input.",
-                    "Map that analog input to Master Kicki-Twister in firmware so left is Sloppy and right is Twisted.",
-                    "If the direction feels backwards, swap the two outside potentiometer legs."
-                ],
-            },
-            buttons: {
-                title: "Preset button wiring",
-                steps: [
-                    "Parts: six momentary pushbuttons, jumper wires, and a breadboard.",
-                    "Place each pushbutton across the breadboard center gap so each side lands on separate rows.",
-                    "Connect one side of every button to Daisy Seed GND.",
-                    "Connect the other side of each button to its own free Daisy Seed digital pin.",
-                    "Use the Daisy internal pull-up setting in firmware so an unpressed button reads high and a pressed button reads low.",
-                    "Recommended future mapping: Soda, Wiks, Cain, Mejje, Roew, and Näbbaz each get one dedicated GPIO pin."
-                ],
-            },
-            oled: {
-                title: "128x64 OLED installation",
-                steps: [
-                    "Parts: one 128x64 monochrome I2C OLED module, jumper wires, and a breadboard.",
-                    "Use an SSD1306-compatible display when possible, because it matches common Daisy/libDaisy examples.",
-                    "Connect OLED GND to Daisy Seed GND.",
-                    "Connect OLED VCC to Daisy Seed 3V3 unless your module explicitly requires 5V.",
-                    "Connect OLED SCL to the Daisy Seed I2C clock pin you reserve in firmware.",
-                    "Connect OLED SDA to the matching Daisy Seed I2C data pin.",
-                    "The browser OLED is currently visual-only. Firmware still needs an SSD1306 display object, I2C pin config, and a small screen update routine."
-                ],
-            },
-            trig: {
-                title: "Trig jack wiring",
-                steps: [
-                    "Parts: one 3.5mm mono jack socket, jumper wires, and a breadboard.",
-                    "Connect the jack sleeve to Daisy Seed GND.",
-                    "Connect the jack tip to a free Daisy Seed digital input pin reserved for trigger input.",
-                    "Use the Daisy internal pull-down or pull-up mode in firmware, matching the trigger circuit you choose.",
-                    "Keep incoming trigger and gate signals within the Daisy Seed 0V to 3V3 input range.",
-                    "The browser Trig jack is currently visual-only. Firmware still needs a GPIO trigger input that calls TriggerKick() on a rising edge."
-                ],
-            },
-            out: {
-                title: "Out jack wiring",
-                steps: [
-                    "Parts: one 3.5mm mono jack socket, jumper wires, and optionally a small series resistor.",
-                    "Connect the jack sleeve to Daisy Seed GND.",
-                    "Connect the jack tip to one Daisy Seed audio output channel.",
-                    "The current firmware writes the same kick signal to both Daisy Seed audio outputs, so either output channel can feed a mono Out jack.",
-                    "Do not connect the output directly to a speaker. Use a mixer, audio interface, amp input, or eurorack output circuit.",
-                    "Keep kOutputGain conservative in src/kicki.cpp if the output clips downstream."
-                ],
-            },
-        };
-
         const wiringDetails = {
             seed: {
                 title: "Daisy Seed overview",
                 body: "The Daisy Seed sits across the breadboard center gap. Power rails feed shared 3V3 and GND, while each control or jack gets its own signal wire.",
+                steps: [
+                    "Place the Daisy Seed across the breadboard center gap.",
+                    "Connect Daisy Seed 3V3 to the positive rail.",
+                    "Connect Daisy Seed GND to the ground rail.",
+                    "Build each module control from its own signal wire plus the shared rails."
+                ],
                 signal: "Audio firmware, controls, and panel I/O",
                 status: "Overview",
             },
             power: {
                 title: "3V3 rail",
                 body: "Daisy Seed 3V3 feeds the breadboard positive rail. Use it for OLED VCC and the outside legs of the potentiometers.",
+                steps: [
+                    "Connect Daisy Seed 3V3 to the breadboard positive rail.",
+                    "Use this rail for OLED VCC.",
+                    "Use this rail for one outside leg of each potentiometer.",
+                    "Do not connect 3V3 directly to GND."
+                ],
                 signal: "Daisy 3V3 to breadboard + rail",
                 status: "Required",
             },
             ground: {
                 title: "GND rail",
                 body: "Daisy Seed GND feeds the breadboard ground rail. Every component needs a shared ground reference.",
+                steps: [
+                    "Connect Daisy Seed GND to the breadboard ground rail.",
+                    "Connect jack sleeves, LED cathode, button common sides, OLED GND, and potentiometer ground legs to this rail.",
+                    "Keep every external signal referenced to this shared ground."
+                ],
                 signal: "Daisy GND to breadboard - rail",
                 status: "Required",
             },
             oled: {
                 title: "OLED display",
-                body: "Use a 128x64 SSD1306-style I2C OLED. Wire VCC and GND to the rails, then wire SCL and SDA to the I2C pins you reserve in firmware.",
-                signal: "3V3, GND, I2C SCL, I2C SDA",
+                body: "Use a 128x64 SSD1306-style I2C OLED. Wire VCC and GND to the rails, then wire SCL to D11 and SDA to D12.",
+                steps: [
+                    "Use a 128x64 SSD1306-compatible I2C OLED module.",
+                    "Connect OLED GND to the ground rail.",
+                    "Connect OLED VCC to 3V3 unless the module explicitly requires something else.",
+                    "Connect OLED SCL to Daisy Seed D11.",
+                    "Connect OLED SDA to Daisy Seed D12.",
+                    "Firmware still needs an SSD1306 display object and screen update routine."
+                ],
+                signal: "3V3, GND, D11/SCL, D12/SDA",
                 status: "Preview only until OLED firmware is added",
             },
             led: {
                 title: "Panel LED",
-                body: "Wire the LED cathode to GND and the anode through a resistor to a free Daisy digital pin. Firmware still needs a small LED or PWM output.",
-                signal: "Digital output through 1k resistor",
-                status: "Suggested wiring",
+                body: "Wire the LED cathode to GND and the anode through a 1k resistor to D13. Firmware still needs a small LED or PWM output.",
+                steps: [
+                    "Put the LED across the breadboard center gap.",
+                    "Connect the LED cathode, the shorter leg or flat-edge side, to GND.",
+                    "Connect the LED anode through a 1k resistor to Daisy Seed D13.",
+                    "Do not connect an LED directly between 3V3 and GND without a resistor.",
+                    "Firmware still needs a D13 LED/PWM output for real hardware."
+                ],
+                signal: "D13 digital output through 1k resistor",
+                status: "Chosen pin: D13",
             },
             masterdist: {
                 title: "Masterdist pot",
                 body: "Use a 10k linear potentiometer. Outside legs go to 3V3 and GND; the wiper goes to A0 / D15. Firmware already has this prepared, disabled by default.",
+                steps: [
+                    "Use a 10k linear potentiometer.",
+                    "Place the potentiometer so its three legs are on separate breadboard rows.",
+                    "Connect one outside leg to 3V3.",
+                    "Connect the other outside leg to GND.",
+                    "Connect the middle wiper leg to Daisy Seed A0 / D15.",
+                    "After wiring, set kMasterDistKnobEnabled to true in src/kicki.cpp."
+                ],
                 signal: "A0 / D15 analog input",
                 status: "Prepared in firmware",
             },
             twisterknob: {
                 title: "Sloppy/Twisted pot",
-                body: "Use a second 10k linear potentiometer. Outside legs go to 3V3 and GND; the wiper should go to a free analog input and be mapped to Master Kicki-Twister.",
-                signal: "Suggested free analog input",
-                status: "Needs firmware pin mapping",
+                body: "Use a second 10k linear potentiometer. Outside legs go to 3V3 and GND; the wiper goes to A1 / D16 and should be mapped to Master Kicki-Twister.",
+                steps: [
+                    "Use a second 10k linear potentiometer.",
+                    "Connect one outside leg to 3V3.",
+                    "Connect the other outside leg to GND.",
+                    "Connect the middle wiper leg to Daisy Seed A1 / D16.",
+                    "Map A1 / D16 to Master Kicki-Twister in firmware.",
+                    "If the direction feels backwards, swap the two outside potentiometer legs."
+                ],
+                signal: "A1 / D16 analog input",
+                status: "Chosen pin: A1 / D16",
             },
             buttons: {
                 title: "Preset buttons",
-                body: "Use six momentary buttons. One side of each button goes to GND; the other side goes to its own digital input with internal pull-up enabled.",
-                signal: "Six digital inputs",
-                status: "Suggested wiring",
+                body: "Use six momentary buttons. One side of each button goes to GND; the signal sides go to D2, D3, D4, D5, D6, and D7 with internal pull-up enabled.",
+                steps: [
+                    "Use six momentary pushbuttons.",
+                    "Connect one side of every button to GND.",
+                    "Connect Soda to D2, Wiks to D3, Cain to D4, Mejje to D5, Roew to D6, and Nabbaz to D7.",
+                    "Use Daisy internal pull-up mode so pressed reads low and unpressed reads high.",
+                    "Firmware still needs D2-D7 preset button input handling."
+                ],
+                signal: "D2-D7 digital inputs",
+                status: "Chosen pins: Soda D2, Wiks D3, Cain D4, Mejje D5, Roew D6, Nabbaz D7",
             },
             trig: {
                 title: "Trig jack",
-                body: "Wire jack sleeve to GND and tip to a digital input protected for Daisy's 0V to 3V3 range. Firmware should trigger the kick on a rising edge.",
-                signal: "Digital trigger input",
-                status: "Needs firmware trigger input",
+                body: "Wire jack sleeve to GND and tip to D8, protected for Daisy's 0V to 3V3 range. Firmware should trigger the kick on a rising edge.",
+                steps: [
+                    "Use a 3.5mm mono jack socket.",
+                    "Connect the jack sleeve to GND.",
+                    "Connect the jack tip to Daisy Seed D8.",
+                    "Keep incoming trigger and gate signals within the Daisy Seed 0V to 3V3 input range.",
+                    "Firmware still needs D8 GPIO trigger input handling."
+                ],
+                signal: "D8 digital trigger input",
+                status: "Chosen pin: D8",
             },
             out: {
                 title: "Out jack",
-                body: "Wire jack sleeve to GND and tip to one Daisy audio output. Feed a mixer, audio interface, amp input, or eurorack output circuit, not a speaker directly.",
-                signal: "Daisy audio output",
-                status: "Firmware outputs mono to both audio channels",
+                body: "Wire jack sleeve to GND and tip to Daisy audio output 1. Feed a mixer, audio interface, amp input, or eurorack output circuit, not a speaker directly.",
+                steps: [
+                    "Use a 3.5mm mono jack socket.",
+                    "Connect the jack sleeve to GND.",
+                    "Connect the jack tip to Daisy Seed audio output 1.",
+                    "Feed a mixer, audio interface, amp input, or eurorack output circuit.",
+                    "Do not connect the output directly to a speaker."
+                ],
+                signal: "Daisy audio output 1",
+                status: "Chosen output: OUT1",
             },
         };
 
@@ -1989,36 +1948,17 @@
             });
         }
 
-        function openHardwareModal(kind) {
-            const instructions = hardwareInstructions[kind];
-            if(!instructions) {
-                return;
-            }
-
-            els.hardwareModalTitle.textContent = instructions.title;
-            els.hardwareModalBody.innerHTML = "";
-
-            const list = document.createElement("ol");
-            instructions.steps.forEach((step) => {
-                const item = document.createElement("li");
-                item.textContent = step;
-                list.appendChild(item);
-            });
-
-            els.hardwareModalBody.appendChild(list);
-            els.hardwareModal.hidden = false;
-            els.hardwareModalClose.focus();
-        }
-
-        function closeHardwareModal() {
-            els.hardwareModal.hidden = true;
-        }
-
         function selectWiring(kind) {
             const details = wiringDetails[kind] || wiringDetails.seed;
 
             els.wiringTitle.textContent = details.title;
             els.wiringBody.textContent = details.body;
+            els.wiringSteps.innerHTML = "";
+            (details.steps || []).forEach((step) => {
+                const item = document.createElement("li");
+                item.textContent = step;
+                els.wiringSteps.appendChild(item);
+            });
             els.wiringSignal.textContent = details.signal;
             els.wiringStatus.textContent = details.status;
             els.wiringTargets.forEach((target) => {
@@ -2792,15 +2732,6 @@
         els.presetSlotButtons.forEach((button) => {
             button.addEventListener("click", () => handlePresetSlot(Number(button.dataset.presetSlot)));
         });
-        els.rackLedHelp.addEventListener("click", () => openHardwareModal("led"));
-        els.rackOledHelp.addEventListener("click", () => openHardwareModal("oled"));
-        els.rackMasterDistHelp.addEventListener("click", () => openHardwareModal("masterdist"));
-        els.rackTwisterHelp.addEventListener("click", () => openHardwareModal("twisterknob"));
-        els.rackPresetHelp.addEventListener("click", () => openHardwareModal("buttons"));
-        els.rackTrigHelp.addEventListener("click", () => openHardwareModal("trig"));
-        els.rackOutHelp.addEventListener("click", () => openHardwareModal("out"));
-        els.hardwareModalClose.addEventListener("click", closeHardwareModal);
-        els.hardwareModalBackdrop.addEventListener("click", closeHardwareModal);
         els.wiringTargets.forEach((target) => {
             target.addEventListener("click", () => selectWiring(target.dataset.wiring));
             target.addEventListener("keydown", (event) => {
@@ -2812,11 +2743,6 @@
             });
         });
         document.addEventListener("keydown", (event) => {
-            if(event.key === "Escape" && !els.hardwareModal.hidden) {
-                closeHardwareModal();
-                return;
-            }
-
             if(event.code === "Space" && !event.repeat && !shouldIgnoreSpaceShortcut(event)) {
                 event.preventDefault();
                 toggleRepeat();
