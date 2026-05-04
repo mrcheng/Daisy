@@ -245,11 +245,28 @@
                         </div>
                     </div>
                     <div class="control">
+                        <label for="twisterRatio">Ratio</label>
+                        <div class="value-row">
+                            <input id="twisterRatio" type="range" min="1" max="12" step="0.1" value="4">
+                            <span class="readout" id="twisterRatioReadout">4.0:1</span>
+                        </div>
+                        <p class="control-description">How firmly loud peaks are pushed down.</p>
+                    </div>
+                    <div class="control">
+                        <label for="twisterAttack">Attack</label>
+                        <div class="value-row">
+                            <input id="twisterAttack" type="range" min="0.001" max="0.08" step="0.001" value="0.006">
+                            <span class="readout" id="twisterAttackReadout">6 ms</span>
+                        </div>
+                        <p class="control-description">How quickly the pull grabs the start of the hit.</p>
+                    </div>
+                    <div class="control">
                         <label for="twisterPull">Pull</label>
                         <div class="value-row">
                             <input id="twisterPull" type="range" min="0" max="1" step="0.01" value="0.35">
                             <span class="readout" id="twisterPullReadout">0.35</span>
                         </div>
+                        <p class="control-description">Overall ducking depth when the hit gets too loud.</p>
                     </div>
                     <div class="control">
                         <label for="twisterRecovery">Recovery</label>
@@ -257,6 +274,7 @@
                             <input id="twisterRecovery" type="range" min="0.03" max="0.8" step="0.01" value="0.22">
                             <span class="readout" id="twisterRecoveryReadout">220 ms</span>
                         </div>
+                        <p class="control-description">How long it takes the output to breathe back up.</p>
                     </div>
                     <div class="control">
                         <label for="twisterAccent">Accent</label>
@@ -264,6 +282,7 @@
                             <input id="twisterAccent" type="range" min="0" max="1" step="0.01" value="0.30">
                             <span class="readout" id="twisterAccentReadout">0.30</span>
                         </div>
+                        <p class="control-description">Makes hard hits lean harder into the compressor.</p>
                     </div>
                     <div class="control">
                         <label for="twisterStruggle">Struggle</label>
@@ -271,123 +290,128 @@
                             <input id="twisterStruggle" type="range" min="0" max="1" step="0.01" value="0.32">
                             <span class="readout" id="twisterStruggleReadout">0.32</span>
                         </div>
+                        <p class="control-description">Adds unstable hardware-style bend while it pulls.</p>
                     </div>
                 </div>
-                <canvas class="twister-canvas" id="twisterCanvas" width="720" height="150" aria-label="Kicki-Twister waveform response"></canvas>
+                <canvas class="twister-canvas" id="twisterCanvas" width="720" height="260" aria-label="Kicki-Twister compression curve with 0 to 500 Hz spectrum"></canvas>
             </div>
 
-            <div class="section-heading">Good Vibrations</div>
-            <p class="section-helper">The gritty shit that will make Kicki Danielsson vibrate</p>
-            <div class="control macro-control">
-                <label for="masterDist">Good vibrations/Masterdist</label>
-                <div class="value-row">
-                    <input id="masterDist" type="range" min="0" max="2" step="0.01" value="1">
-                    <span class="readout" id="masterDistReadout">1.00x</span>
-                </div>
-            </div>
-            <div class="grid">
-                <div class="control effect-control">
-                    <label class="toggle-label" for="simpleClipOn">
-                        <input id="simpleClipOn" type="checkbox">
-                        Simple clipping
-                    </label>
+            <div class="good-vibrations-panel">
+                <div class="section-heading">Good Vibrations</div>
+                <p class="section-helper">The gritty shit that will make Kicki Danielsson vibrate</p>
+                <div class="control macro-control">
+                    <label for="masterDist">Good vibrations/Masterdist</label>
                     <div class="value-row">
-                        <input id="simpleClipDrive" type="range" min="0" max="1" step="0.01" value="0.25">
-                        <span class="readout" id="simpleClipDriveReadout">0.25</span>
+                        <input id="masterDist" type="range" min="0" max="2" step="0.01" value="1">
+                        <span class="readout" id="masterDistReadout">1.00x</span>
                     </div>
                 </div>
-
-                <div class="control effect-control">
-                    <label class="toggle-label" for="overdriveOn">
-                        <input id="overdriveOn" type="checkbox">
-                        DaisySP Overdrive
-                    </label>
-                    <div class="value-row">
-                        <input id="overdriveDrive" type="range" min="0" max="1" step="0.01" value="0.35">
-                        <span class="readout" id="overdriveDriveReadout">0.35</span>
+                <div class="grid">
+                    <div class="control effect-control">
+                        <label class="toggle-label" for="simpleClipOn">
+                            <input id="simpleClipOn" type="checkbox">
+                            Simple clipping
+                        </label>
+                        <div class="value-row">
+                            <input id="simpleClipDrive" type="range" min="0" max="1" step="0.01" value="0.25">
+                            <span class="readout" id="simpleClipDriveReadout">0.25</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="control effect-control">
-                    <label class="toggle-label" for="wavefolderOn">
-                        <input id="wavefolderOn" type="checkbox">
-                        Wavefolder
-                    </label>
-                    <div class="value-row">
-                        <input id="wavefolderDrive" type="range" min="0" max="1" step="0.01" value="0.20">
-                        <span class="readout" id="wavefolderDriveReadout">0.20</span>
+                    <div class="control effect-control">
+                        <label class="toggle-label" for="overdriveOn">
+                            <input id="overdriveOn" type="checkbox">
+                            DaisySP Overdrive
+                        </label>
+                        <div class="value-row">
+                            <input id="overdriveDrive" type="range" min="0" max="1" step="0.01" value="0.35">
+                            <span class="readout" id="overdriveDriveReadout">0.35</span>
+                        </div>
                     </div>
-                </div>
 
-                <div class="control effect-control">
-                    <label class="toggle-label" for="saturationOn">
-                        <input id="saturationOn" type="checkbox">
-                        Saturation
-                    </label>
-                    <div class="value-row">
-                        <input id="saturationDrive" type="range" min="0" max="1" step="0.01" value="0.35">
-                        <span class="readout" id="saturationDriveReadout">0.35</span>
+                    <div class="control effect-control">
+                        <label class="toggle-label" for="wavefolderOn">
+                            <input id="wavefolderOn" type="checkbox">
+                            Wavefolder
+                        </label>
+                        <div class="value-row">
+                            <input id="wavefolderDrive" type="range" min="0" max="1" step="0.01" value="0.20">
+                            <span class="readout" id="wavefolderDriveReadout">0.20</span>
+                        </div>
                     </div>
-                    <select id="saturationPosition">
-                        <option value="pre" selected>Before lowpass</option>
-                        <option value="post">After lowpass</option>
-                    </select>
+
+                    <div class="control effect-control">
+                        <label class="toggle-label" for="saturationOn">
+                            <input id="saturationOn" type="checkbox">
+                            Saturation
+                        </label>
+                        <div class="value-row">
+                            <input id="saturationDrive" type="range" min="0" max="1" step="0.01" value="0.35">
+                            <span class="readout" id="saturationDriveReadout">0.35</span>
+                        </div>
+                        <select id="saturationPosition">
+                            <option value="pre" selected>Before lowpass</option>
+                            <option value="post">After lowpass</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="section-heading">Master</div>
-            <div class="grid compact-grid">
-                <div class="control">
-                    <label for="gain">Output gain</label>
-                    <div class="value-row">
-                        <input id="gain" type="range" min="0" max="1" step="0.01" value="0.7">
-                        <span class="readout" id="gainReadout">0.70</span>
+            <div class="master-panel">
+                <div class="section-heading">Master</div>
+                <div class="grid compact-grid">
+                    <div class="control">
+                        <label for="gain">Output gain</label>
+                        <div class="value-row">
+                            <input id="gain" type="range" min="0" max="1" step="0.01" value="0.7">
+                            <span class="readout" id="gainReadout">0.70</span>
+                        </div>
                     </div>
+
                 </div>
 
-            </div>
-
-            <div class="actions">
-                <button class="primary" id="trigger">Trigger</button>
-                <button class="secondary" id="repeat">Repeat</button>
-                <button class="secondary" id="tapTempo">Tap Tempo</button>
-                <button class="danger" id="stop">Stop</button>
-                <button class="secondary" id="randomize">Randomize</button>
-                <button class="secondary" id="randomizeWithoutAdsr">Randomize without ADSR</button>
-                <span class="tempo-readout" id="tempoReadout">80 BPM</span>
-            </div>
-
-            <div class="tempo-control" aria-label="Manual BPM control">
-                <input id="bpm" type="range" min="30" max="300" step="1" value="80">
-                <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
-            </div>
-
-            <div class="vu" aria-label="Output VU meter">
-                <div class="vu-header">
-                    <span>VU</span>
-                    <span class="vu-readout" id="vuReadout">-inf dB</span>
+                <div class="actions">
+                    <button class="primary" id="trigger">Trigger</button>
+                    <button class="secondary" id="repeat">Repeat</button>
+                    <button class="secondary" id="tapTempo">Tap Tempo</button>
+                    <button class="danger" id="stop">Stop</button>
+                    <button class="secondary" id="randomize">Randomize</button>
+                    <button class="secondary" id="randomizeWithoutAdsr">Randomize without ADSR</button>
+                    <span class="tempo-readout" id="tempoReadout">80 BPM</span>
                 </div>
-                <div class="vu-bar">
-                    <div class="vu-fill" id="vuFill"></div>
-                    <div class="vu-peak" id="vuPeak"></div>
+
+                <div class="tempo-control" aria-label="Manual BPM control">
+                    <input id="bpm" type="range" min="30" max="300" step="1" value="80">
+                    <input id="bpmNumber" type="number" min="30" max="300" step="1" value="80">
                 </div>
-                <div class="spectrum" aria-label="Output spectrum analyzer 0 to 20 kilohertz">
-                    <div class="spectrum-header">
-                        <span>Spectrum</span>
-                        <span>0-20 kHz</span>
+
+                <div class="vu" aria-label="Output VU meter">
+                    <div class="vu-header">
+                        <span>VU</span>
+                        <span class="vu-readout" id="vuReadout">-inf dB</span>
                     </div>
-                    <canvas class="spectrum-canvas" id="spectrumCanvas" width="720" height="160"></canvas>
-                </div>
-                <div class="scope" aria-label="Output oscilloscope">
-                    <div class="scope-header">
-                        <span>Oscilloscope</span>
-                        <span id="scopeHoldReadout">0.0s hold</span>
+                    <div class="vu-bar">
+                        <div class="vu-fill" id="vuFill"></div>
+                        <div class="vu-peak" id="vuPeak"></div>
                     </div>
-                    <div class="scope-control" aria-label="Oscilloscope hold fade length">
-                        <span>Hold</span>
-                        <input id="scopeHold" type="range" min="0" max="10" step="0.1" value="0.0">
+                    <div class="spectrum" aria-label="Output spectrum analyzer 0 to 20 kilohertz">
+                        <div class="spectrum-header">
+                            <span>Spectrum</span>
+                            <span>0-20 kHz</span>
+                        </div>
+                        <canvas class="spectrum-canvas" id="spectrumCanvas" width="720" height="160"></canvas>
                     </div>
-                    <canvas class="scope-canvas" id="scopeCanvas" width="720" height="140"></canvas>
+                    <div class="scope" aria-label="Output oscilloscope">
+                        <div class="scope-header">
+                            <span>Oscilloscope</span>
+                            <span id="scopeHoldReadout">0.0s hold</span>
+                        </div>
+                        <div class="scope-control" aria-label="Oscilloscope hold fade length">
+                            <span>Hold</span>
+                            <input id="scopeHold" type="range" min="0" max="10" step="0.1" value="0.0">
+                        </div>
+                        <canvas class="scope-canvas" id="scopeCanvas" width="720" height="140"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -470,6 +494,8 @@
             resonance: document.querySelector("#resonance"),
             masterDist: document.querySelector("#masterDist"),
             masterTwister: document.querySelector("#masterTwister"),
+            twisterRatio: document.querySelector("#twisterRatio"),
+            twisterAttack: document.querySelector("#twisterAttack"),
             twisterPull: document.querySelector("#twisterPull"),
             twisterRecovery: document.querySelector("#twisterRecovery"),
             twisterAccent: document.querySelector("#twisterAccent"),
@@ -569,6 +595,8 @@
             "resonance",
             "masterDist",
             "masterTwister",
+            "twisterRatio",
+            "twisterAttack",
             "twisterPull",
             "twisterRecovery",
             "twisterAccent",
@@ -613,6 +641,8 @@
                     saturationDrive: 0.07,
                     twisterPost: true,
                     twisterOn: true,
+                    twisterRatio: 4,
+                    twisterAttack: 0.006,
                     twisterPull: 0.35,
                     twisterRecovery: 0.22,
                     twisterAccent: 0.3,
@@ -646,6 +676,8 @@
                     saturationDrive: 0.14,
                     twisterPost: true,
                     twisterOn: true,
+                    twisterRatio: 3.2,
+                    twisterAttack: 0.01,
                     twisterPull: 0.28,
                     twisterRecovery: 0.18,
                     twisterAccent: 0.24,
@@ -679,6 +711,8 @@
                     saturationDrive: 0.18,
                     twisterPost: false,
                     twisterOn: true,
+                    twisterRatio: 6.5,
+                    twisterAttack: 0.003,
                     twisterPull: 0.48,
                     twisterRecovery: 0.16,
                     twisterAccent: 0.46,
@@ -712,6 +746,8 @@
                     saturationDrive: 0.05,
                     twisterPost: true,
                     twisterOn: false,
+                    twisterRatio: 2.4,
+                    twisterAttack: 0.018,
                     twisterPull: 0.22,
                     twisterRecovery: 0.36,
                     twisterAccent: 0.18,
@@ -745,6 +781,8 @@
                     saturationDrive: 0.2,
                     twisterPost: false,
                     twisterOn: true,
+                    twisterRatio: 5,
+                    twisterAttack: 0.012,
                     twisterPull: 0.42,
                     twisterRecovery: 0.31,
                     twisterAccent: 0.34,
@@ -778,6 +816,8 @@
                     saturationDrive: 0.1,
                     twisterPost: true,
                     twisterOn: true,
+                    twisterRatio: 8,
+                    twisterAttack: 0.002,
                     twisterPull: 0.55,
                     twisterRecovery: 0.09,
                     twisterAccent: 0.62,
@@ -915,6 +955,7 @@
                 updateRackLed();
                 drawRackOled();
                 updateScopeHold(peak);
+                drawTwisterWaveform();
                 drawSpectrumAnalyzer();
                 drawOscilloscope();
 
@@ -1250,6 +1291,8 @@
                 masterTwister: value("masterTwister"),
                 twisterOn: checked("twisterOn"),
                 twisterPost: els.twisterPosition.value === "post",
+                twisterRatio: value("twisterRatio"),
+                twisterAttack: value("twisterAttack"),
                 twisterPull: value("twisterPull"),
                 twisterRecovery: value("twisterRecovery"),
                 twisterAccent: value("twisterAccent"),
@@ -1314,6 +1357,8 @@
                 resonance: "resonance",
                 masterDist: "masterDist",
                 masterTwister: "masterTwister",
+                twisterRatio: "twisterRatio",
+                twisterAttack: "twisterAttack",
                 twisterPull: "twisterPull",
                 twisterRecovery: "twisterRecovery",
                 twisterAccent: "twisterAccent",
@@ -1600,6 +1645,8 @@
                 "constexpr bool  kTwisterOn        = " + String(settings.twisterOn) + ";",
                 "constexpr bool  kTwisterPost      = " + String(settings.twisterPost) + ";",
                 "constexpr float kTwisterMaster    = " + settings.masterTwister.toFixed(2) + "f;",
+                "constexpr float kTwisterRatio     = " + settings.twisterRatio.toFixed(1) + "f;",
+                "constexpr float kTwisterAttackSec = " + settings.twisterAttack.toFixed(3) + "f;",
                 "constexpr float kTwisterPull      = " + settings.twisterPull.toFixed(2) + "f;",
                 "constexpr float kTwisterRecoverySec = " + settings.twisterRecovery.toFixed(3) + "f;",
                 "constexpr float kTwisterAccent    = " + settings.twisterAccent.toFixed(2) + "f;",
@@ -1644,6 +1691,8 @@
             document.querySelector("#resonanceReadout").textContent = value("resonance").toFixed(2);
             document.querySelector("#masterDistReadout").textContent = `${value("masterDist").toFixed(2)}x`;
             document.querySelector("#masterTwisterReadout").textContent = `${value("masterTwister").toFixed(2)}x`;
+            document.querySelector("#twisterRatioReadout").textContent = `${value("twisterRatio").toFixed(1)}:1`;
+            document.querySelector("#twisterAttackReadout").textContent = `${Math.round(value("twisterAttack") * 1000)} ms`;
             document.querySelector("#twisterPullReadout").textContent = value("twisterPull").toFixed(2);
             document.querySelector("#twisterRecoveryReadout").textContent = `${Math.round(value("twisterRecovery") * 1000)} ms`;
             document.querySelector("#twisterAccentReadout").textContent = value("twisterAccent").toFixed(2);
@@ -2067,20 +2116,23 @@
         function twisterSample(sig, settings, sampleRate, twister) {
             const twisterMaster = settings.masterTwister ?? 1;
             const twisterPull = clamp(settings.twisterPull * twisterMaster, 0, 1);
-            if(!settings.twisterOn || twisterPull <= 0) {
+            const twisterRatio = Math.max(1, settings.twisterRatio);
+            const ratioAmount = (twisterRatio - 1) / twisterRatio;
+            if(!settings.twisterOn || twisterPull <= 0 || ratioAmount <= 0) {
                 return sig;
             }
 
             const twisterAccent = clamp(settings.twisterAccent * twisterMaster, 0, 1);
             const twisterStruggle = clamp(settings.twisterStruggle * twisterMaster, 0, 1);
             const level = Math.abs(sig) * (1 + twisterAccent * 1.4);
-            const attackCoeff = twister.attackCoeff ?? Math.exp(-1 / (0.003 * sampleRate));
+            const attackCoeff = twister.attackCoeff ?? Math.exp(-1 / (settings.twisterAttack * sampleRate));
             const releaseCoeff = twister.releaseCoeff ?? Math.exp(-1 / (settings.twisterRecovery * sampleRate));
             const coeff = level > twister.env ? attackCoeff : releaseCoeff;
             twister.env = coeff * twister.env + (1 - coeff) * level;
 
-            const over = clamp((twister.env - 0.18) / 0.82, 0, 1);
-            const targetSag = over * twisterPull * 0.55;
+            const threshold = 0.18;
+            const over = clamp((twister.env - threshold) / (1 - threshold), 0, 1);
+            const targetSag = over * twisterPull * ratioAmount * 0.72;
             const sagRate = targetSag > twister.sag ? 0.18 : (1 - releaseCoeff);
             twister.sag += (targetSag - twister.sag) * sagRate;
 
@@ -2096,7 +2148,7 @@
             const ctx = canvas.getContext("2d");
             const pixelRatio = window.devicePixelRatio || 1;
             const width = Math.max(320, Math.floor(canvas.clientWidth));
-            const height = Math.max(120, Math.floor(canvas.clientHeight));
+            const height = Math.max(190, Math.floor(canvas.clientHeight));
             const scaledWidth = Math.floor(width * pixelRatio);
             const scaledHeight = Math.floor(height * pixelRatio);
 
@@ -2111,86 +2163,169 @@
             ctx.fillRect(0, 0, width, height);
 
             const settings = currentSettings();
-            const sampleRate = 48000;
-            const centerY = Math.round(height * 0.5);
-            const amp = height * 0.34;
-            const plotLeft = 18;
-            const plotRight = 12;
-            const plotWidth = width - plotLeft - plotRight;
-            const twister = {
-                env: 0,
-                sag: 0,
-                attackCoeff: Math.exp(-1 / (0.003 * sampleRate)),
-                releaseCoeff: Math.exp(-1 / (settings.twisterRecovery * sampleRate)),
-            };
-            const previewSettings = { ...settings, twisterOn: true };
-            const raw = [];
-            const processed = [];
-            const sag = [];
+            const margin = 18;
+            const graphLeft = margin;
+            const graphTop = margin;
+            const graphWidth = width - margin * 2;
+            const graphHeight = height - margin * 2 - 18;
 
-            for(let x = 0; x < plotWidth; x++) {
-                const t = x / plotWidth;
-                const hit = Math.exp(-t * 4.2);
-                const body = Math.sin(t * Math.PI * 18) * hit;
-                const click = Math.sin(t * Math.PI * 64) * Math.exp(-t * 22) * 0.42;
-                const previewMaster = settings.masterTwister ?? 1;
-                const sig = (body + click) * (0.95 + clamp(settings.twisterAccent * previewMaster, 0, 1) * 0.34);
-                raw.push(sig);
-                processed.push(twisterSample(sig, previewSettings, sampleRate, twister));
-                sag.push(twister.sag);
-            }
+            drawCompressionCurve(ctx, settings, graphLeft, graphTop, graphWidth, graphHeight);
+        }
+
+        function drawCompressionCurve(ctx, settings, left, top, width, height) {
+            const threshold = 0.18;
+            const ratio = twisterEffectiveGraphRatio(settings);
+            const thresholdX = left + threshold * width;
+            const thresholdY = top + height - threshold * height;
+
+            ctx.fillStyle = "rgba(192, 139, 36, 0.08)";
+            ctx.fillRect(thresholdX, top, left + width - thresholdX, height);
+
+            drawTwisterSpectrum(ctx, settings, left, top, width, height, threshold);
 
             ctx.strokeStyle = "#d8ddd8";
             ctx.lineWidth = 1;
+            ctx.strokeRect(left, top, width, height);
+
+            ctx.strokeStyle = "rgba(216, 221, 216, 0.8)";
+            for(let line = 1; line < 4; line++) {
+                const pos = line / 4;
+                ctx.beginPath();
+                ctx.moveTo(left + pos * width, top);
+                ctx.lineTo(left + pos * width, top + height);
+                ctx.moveTo(left, top + pos * height);
+                ctx.lineTo(left + width, top + pos * height);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = "#aeb5ac";
+            ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(plotLeft, centerY);
-            ctx.lineTo(width - plotRight, centerY);
+            ctx.moveTo(left, top + height);
+            ctx.lineTo(left + width, top);
             ctx.stroke();
 
-            drawSagPath(ctx, sag, plotLeft, height - 18, height * 0.28);
-            drawWavePath(ctx, raw, plotLeft, centerY, amp, "#aeb5ac", 1.25);
-            drawWavePath(ctx, processed, plotLeft, centerY, amp, "#17685e", 2);
-
-            ctx.fillStyle = "#626a70";
-            ctx.font = "12px system-ui, sans-serif";
-            ctx.textBaseline = "top";
-            ctx.fillText("in", plotLeft, 10);
-            ctx.fillStyle = "#17685e";
-            ctx.fillText("twisted", plotLeft + 28, 10);
-            ctx.fillStyle = "#c08b24";
-            ctx.fillText("pull", plotLeft + 94, 10);
-        }
-
-        function drawSagPath(ctx, data, left, bottom, height) {
-            ctx.fillStyle = "rgba(192, 139, 36, 0.2)";
+            ctx.strokeStyle = "#17685e";
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(left, bottom);
-
-            data.forEach((sample, index) => {
-                ctx.lineTo(left + index, bottom - sample * height * 4);
-            });
-
-            ctx.lineTo(left + data.length - 1, bottom);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        function drawWavePath(ctx, data, left, centerY, amp, color, lineWidth) {
-            ctx.strokeStyle = color;
-            ctx.lineWidth = lineWidth;
-            ctx.beginPath();
-
-            data.forEach((sample, index) => {
-                const x = left + index;
-                const y = centerY - sample * amp;
-                if(index === 0) {
+            for(let point = 0; point <= 96; point++) {
+                const level = point / 96;
+                const x = left + level * width;
+                const y = twisterCurveY(level, threshold, ratio, settings, top, height);
+                if(point === 0) {
                     ctx.moveTo(x, y);
                 } else {
                     ctx.lineTo(x, y);
                 }
-            });
-
+            }
             ctx.stroke();
+
+            ctx.fillStyle = "#c08b24";
+            ctx.fillRect(thresholdX - 1, top, 2, height);
+            ctx.fillRect(left, thresholdY - 1, width, 2);
+
+            ctx.fillStyle = "#626a70";
+            ctx.font = "12px system-ui, sans-serif";
+            ctx.textBaseline = "top";
+            ctx.fillText("in", left, top + height + 8);
+            ctx.fillStyle = "#17685e";
+            ctx.fillText("out", left + width - 24, top + height + 8);
+            ctx.fillStyle = "#c08b24";
+            ctx.fillText("roof", thresholdX + 5, top + 8);
+            ctx.fillStyle = "#626a70";
+            ctx.fillText("0-500 Hz", left + width - 62, top + 8);
+        }
+
+        function twisterEffectiveGraphRatio(settings) {
+            const twisterMaster = settings.masterTwister ?? 1;
+            const twisterPull = settings.twisterOn ? clamp(settings.twisterPull * twisterMaster, 0, 1) : 0;
+            const baseRatio = Math.max(1, settings.twisterRatio);
+
+            return 1 + (baseRatio - 1) * twisterPull;
+        }
+
+        function twisterAttackKnee(settings) {
+            const twisterMaster = settings.masterTwister ?? 1;
+            const twisterPull = settings.twisterOn ? clamp(settings.twisterPull * twisterMaster, 0, 1) : 0;
+            const attackMin = Number(controls.twisterAttack.min) || 0.001;
+            const attackMax = Number(controls.twisterAttack.max) || 0.08;
+            const attackPosition = clamp((settings.twisterAttack - attackMin) / (attackMax - attackMin), 0, 1);
+            const attackGrip = 1 - Math.pow(attackPosition, 0.55);
+
+            return twisterPull * attackGrip * 0.16;
+        }
+
+        function twisterCurveY(level, threshold, ratio, settings, top, height) {
+            const clampedLevel = clamp(level, 0, 1);
+            const knee = twisterAttackKnee(settings);
+            const kneeStart = threshold - knee;
+            const kneeEnd = threshold + knee;
+            let output = clampedLevel;
+
+            if(ratio > 1 && knee > 0 && clampedLevel > kneeStart && clampedLevel < kneeEnd) {
+                const kneeOffset = clampedLevel - threshold + knee;
+                output = clampedLevel + ((1 / ratio) - 1) * kneeOffset * kneeOffset / (4 * knee);
+            } else if(clampedLevel >= kneeEnd || (knee <= 0 && clampedLevel > threshold)) {
+                output = threshold + (clampedLevel - threshold) / ratio;
+            }
+
+            return top + height - output * height;
+        }
+
+        function drawTwisterSpectrum(ctx, settings, left, top, width, height, threshold) {
+            const spectrum = state.spectrumData;
+            const hasSpectrum = spectrum && state.audio;
+            const ratio = twisterEffectiveGraphRatio(settings);
+            const barCount = width < 460 ? 32 : 48;
+            const barGap = 2;
+            const barWidth = Math.max(3, (width - barGap * (barCount - 1)) / barCount);
+            const maxHz = 500;
+
+            if(!hasSpectrum) {
+                ctx.fillStyle = "rgba(174, 181, 172, 0.3)";
+                ctx.fillRect(left, top + height - 1, width, 1);
+                return;
+            }
+
+            const nyquist = state.audio.sampleRate / 2;
+            const maxBin = Math.min(spectrum.length - 1, Math.floor((maxHz / nyquist) * spectrum.length));
+
+            for(let bar = 0; bar < barCount; bar++) {
+                const hzStart = (bar / barCount) * maxHz;
+                const hzEnd = ((bar + 1) / barCount) * maxHz;
+                const binStart = Math.min(maxBin, Math.floor((hzStart / nyquist) * spectrum.length));
+                const binEnd = Math.min(maxBin + 1, Math.max(binStart + 1, Math.ceil((hzEnd / nyquist) * spectrum.length)));
+                let binPeak = 0;
+
+                for(let bin = binStart; bin < binEnd; bin++) {
+                    binPeak = Math.max(binPeak, spectrum[bin]);
+                }
+
+                const normalized = binPeak / 255;
+                const eased = normalized * normalized;
+                const barHeight = Math.max(1, eased * height);
+                const x = left + bar * (barWidth + barGap);
+                const y = top + height - barHeight;
+                const curveLevel = clamp((x + barWidth * 0.5 - left) / width, 0, 1);
+                const curveY = twisterCurveY(curveLevel, threshold, ratio, settings, top, height);
+
+                if(y < curveY) {
+                    ctx.fillStyle = "rgba(31, 122, 104, 0.38)";
+                    ctx.fillRect(x, curveY, barWidth, top + height - curveY);
+                    ctx.fillStyle = "rgba(168, 66, 60, 0.82)";
+                    ctx.fillRect(x, y, barWidth, curveY - y);
+                } else {
+                    ctx.fillStyle = "rgba(31, 122, 104, 0.42)";
+                    ctx.fillRect(x, y, barWidth, barHeight);
+                }
+            }
+
+            ctx.fillStyle = "rgba(98, 106, 112, 0.82)";
+            ctx.font = "11px system-ui, sans-serif";
+            ctx.textBaseline = "bottom";
+            ctx.fillText("0", left + 4, top + height - 5);
+            ctx.fillText("250", left + width * 0.5 - 10, top + height - 5);
+            ctx.fillText("500", left + width - 28, top + height - 5);
         }
 
         function effectiveDistDrive(settings, drive) {
@@ -2367,7 +2502,7 @@
 
         function shouldIgnoreSpaceShortcut(event) {
             const tagName = event.target?.tagName;
-            return tagName === "INPUT" || tagName === "SELECT" || tagName === "TEXTAREA" || tagName === "BUTTON";
+            return tagName === "INPUT" || tagName === "SELECT" || tagName === "TEXTAREA";
         }
 
         Object.values(controls).forEach((control) => {
@@ -2446,7 +2581,7 @@
                 return;
             }
 
-            if(event.code === "Space" && !shouldIgnoreSpaceShortcut(event)) {
+            if(event.code === "Space" && !event.repeat && !shouldIgnoreSpaceShortcut(event)) {
                 event.preventDefault();
                 toggleRepeat();
             }

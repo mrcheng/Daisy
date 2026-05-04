@@ -33,6 +33,8 @@ constexpr float kSaturationDrive  = 0.07f;
 constexpr bool  kTwisterOn        = true;
 constexpr bool  kTwisterPost      = true;
 constexpr float kTwisterMaster    = 1.00f;
+constexpr float kTwisterRatio     = 4.0f;
+constexpr float kTwisterAttackSec = 0.006f;
 constexpr float kTwisterPull      = 0.35f;
 constexpr float kTwisterRecoverySec = 0.220f;
 constexpr float kTwisterAccent    = 0.30f;
@@ -110,18 +112,21 @@ static float KickiTwister(float sig)
 {
     float twister_master   = Clamp(kTwisterMaster, 0.0f, 2.0f);
     float twister_pull     = Clamp(kTwisterPull * twister_master, 0.0f, 1.0f);
+    float twister_ratio    = kTwisterRatio < 1.0f ? 1.0f : kTwisterRatio;
+    float ratio_amount     = (twister_ratio - 1.0f) / twister_ratio;
     float twister_accent   = Clamp(kTwisterAccent * twister_master, 0.0f, 1.0f);
     float twister_struggle = Clamp(kTwisterStruggle * twister_master, 0.0f, 1.0f);
 
-    if(!kTwisterOn || twister_pull <= 0.0f)
+    if(!kTwisterOn || twister_pull <= 0.0f || ratio_amount <= 0.0f)
         return sig;
 
     float level = fabsf(sig) * (1.0f + twister_accent * 1.4f);
     float coeff = level > twister_env ? twister_attack_coeff : twister_release_coeff;
     twister_env = coeff * twister_env + (1.0f - coeff) * level;
 
-    float over       = Clamp((twister_env - 0.18f) / 0.82f, 0.0f, 1.0f);
-    float target_sag = over * twister_pull * 0.55f;
+    float threshold  = 0.18f;
+    float over       = Clamp((twister_env - threshold) / (1.0f - threshold), 0.0f, 1.0f);
+    float target_sag = over * twister_pull * ratio_amount * 0.72f;
     float sag_rate   = target_sag > twister_sag ? 0.18f : (1.0f - twister_release_coeff);
     twister_sag += (target_sag - twister_sag) * sag_rate;
 
@@ -237,7 +242,7 @@ int main(void)
     pitch_decay    = expf(-1.0f / (kPitchDecaySec * sample_rate));
     twister_env    = 0.0f;
     twister_sag    = 0.0f;
-    twister_attack_coeff = expf(-1.0f / (0.003f * sample_rate));
+    twister_attack_coeff = expf(-1.0f / (kTwisterAttackSec * sample_rate));
     twister_release_coeff = expf(-1.0f / (kTwisterRecoverySec * sample_rate));
     attack_samples = static_cast<uint32_t>(kAttackSec * sample_rate);
     decay_samples  = static_cast<uint32_t>(kAmpDecaySec * sample_rate);

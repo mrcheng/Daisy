@@ -30,6 +30,8 @@ ALLOWED_NAMES = {
     "kTwisterOn",
     "kTwisterPost",
     "kTwisterMaster",
+    "kTwisterRatio",
+    "kTwisterAttackSec",
     "kTwisterPull",
     "kTwisterRecoverySec",
     "kTwisterAccent",
