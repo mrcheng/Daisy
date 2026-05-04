@@ -66,6 +66,263 @@ h1 {
     box-shadow: 0 8px 24px rgba(18, 24, 31, 0.08);
 }
 
+.wiring-overview {
+    margin-top: 20px;
+}
+
+.wiring-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 18px;
+    align-items: stretch;
+}
+
+.wiring-diagram {
+    min-width: 0;
+    overflow: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #f9faf8;
+}
+
+.wiring-diagram svg {
+    display: block;
+    min-width: 780px;
+    width: 100%;
+    height: auto;
+}
+
+.breadboard-shell {
+    fill: #f1f3ef;
+    stroke: #c5ccc4;
+    stroke-width: 2;
+}
+
+.breadboard-center {
+    fill: #fff;
+    stroke: #d8ddd8;
+    stroke-width: 1.5;
+}
+
+.rail {
+    stroke-width: 4;
+    stroke-linecap: round;
+}
+
+.rail-positive {
+    stroke: #b9534d;
+}
+
+.rail-ground {
+    stroke: #4f575b;
+}
+
+.rail-label,
+.wiring-node text,
+.pin-label {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing: 0;
+}
+
+.rail-label {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.rail-positive-label {
+    fill: #9b3c36;
+}
+
+.rail-ground-label {
+    fill: #4f575b;
+}
+
+.wire {
+    fill: none;
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    marker-start: url(#wireDot);
+    marker-end: url(#wireDot);
+    cursor: pointer;
+    pointer-events: stroke;
+}
+
+.wire:focus-visible,
+.wire.active {
+    outline: none;
+    stroke-width: 7;
+}
+
+.wire-power {
+    stroke: #b9534d;
+}
+
+.wire-ground {
+    stroke: #4f575b;
+}
+
+.wire-i2c,
+.wire-i2c-alt {
+    stroke: #4f7fbc;
+}
+
+.wire-analog,
+.wire-analog-alt {
+    stroke: #17685e;
+}
+
+.wire-digital,
+.wire-digital-alt {
+    stroke: #c08b24;
+}
+
+.wire-audio {
+    stroke: #7b5aa6;
+}
+
+.wire-led {
+    stroke: #a8423c;
+}
+
+.wiring-node {
+    cursor: pointer;
+}
+
+.wiring-node rect {
+    fill: #fff;
+    stroke: #aeb5ac;
+    stroke-width: 2;
+}
+
+.wiring-node circle {
+    fill: #f6f7f4;
+    stroke: #626a70;
+    stroke-width: 2;
+}
+
+.wiring-node line {
+    stroke: #626a70;
+    stroke-width: 3;
+    stroke-linecap: round;
+}
+
+.wiring-node text {
+    fill: var(--text);
+    font-size: 15px;
+    font-weight: 800;
+    text-anchor: middle;
+}
+
+.wiring-small {
+    fill: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.wiring-seed rect {
+    fill: #202726;
+    stroke: #48524f;
+}
+
+.wiring-seed text {
+    fill: #f7f8f3;
+}
+
+.wiring-seed .wiring-small {
+    fill: #b9c1bb;
+}
+
+.wiring-seed circle {
+    fill: #d8ddd8;
+    stroke: #0b0d0d;
+}
+
+.pin-label {
+    fill: #dce5df;
+    font-size: 10px;
+    font-weight: 750;
+    text-anchor: start;
+}
+
+.pin-right {
+    text-anchor: end;
+}
+
+.wiring-led-dot {
+    fill: #c21a14;
+    stroke: #8d2b26;
+}
+
+.wiring-resistor {
+    fill: #e7d3a5;
+    stroke: #8f7138;
+}
+
+.button-dots circle {
+    fill: #e8ece7;
+}
+
+.wiring-node:hover rect,
+.wiring-node:focus-visible rect,
+.wiring-node.active rect {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.wiring-node:hover circle,
+.wiring-node:focus-visible circle,
+.wiring-node.active circle {
+    stroke: var(--accent-dark);
+}
+
+.wiring-inspector {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fbfcfb;
+}
+
+.wiring-inspector h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.wiring-inspector p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.wiring-inspector dl {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+}
+
+.wiring-inspector dl div {
+    display: grid;
+    gap: 2px;
+}
+
+.wiring-inspector dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.wiring-inspector dd {
+    margin: 0;
+    color: var(--text);
+    font-size: 13px;
+}
+
 .eurorack-panel {
     position: sticky;
     top: 20px;
@@ -1168,6 +1425,14 @@ button {
     .eurorack-panel {
         position: static;
         justify-self: center;
+    }
+
+    .wiring-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .wiring-inspector {
+        min-height: 0;
     }
 }
 

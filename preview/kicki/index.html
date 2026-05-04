@@ -441,6 +441,137 @@
             </div>
         </section>
         </div>
+
+        <section class="surface wiring-overview" aria-label="Daisy Seed and breadboard build overview">
+            <div class="section-heading">Build Overview</div>
+            <div class="wiring-layout">
+                <div class="wiring-diagram" aria-label="Interactive breadboard wiring diagram">
+                    <svg id="wiringDiagram" viewBox="0 0 1120 620" role="img" aria-label="Daisy Seed, breadboard, and Kicki Danielsson module connections">
+                        <defs>
+                            <marker id="wireDot" markerWidth="6" markerHeight="6" refX="3" refY="3">
+                                <circle cx="3" cy="3" r="2.4" fill="#626a70"></circle>
+                            </marker>
+                        </defs>
+
+                        <rect class="breadboard-shell" x="32" y="86" width="1056" height="438" rx="12"></rect>
+                        <rect class="breadboard-center" x="248" y="144" width="624" height="320" rx="8"></rect>
+                        <line class="rail rail-positive" x1="58" y1="116" x2="1062" y2="116"></line>
+                        <line class="rail rail-ground" x1="58" y1="146" x2="1062" y2="146"></line>
+                        <line class="rail rail-positive" x1="58" y1="466" x2="1062" y2="466"></line>
+                        <line class="rail rail-ground" x1="58" y1="496" x2="1062" y2="496"></line>
+                        <text class="rail-label rail-positive-label" x="64" y="108">3V3</text>
+                        <text class="rail-label rail-ground-label" x="64" y="166">GND</text>
+
+                        <path class="wire wire-power" data-wiring="power" tabindex="0" role="button" aria-label="3V3 power rail" d="M450 188 L302 188 L302 116"></path>
+                        <path class="wire wire-ground" data-wiring="ground" tabindex="0" role="button" aria-label="Ground rail" d="M450 226 L318 226 L318 496"></path>
+                        <path class="wire wire-i2c" data-wiring="oled" tabindex="0" role="button" aria-label="OLED I2C wiring" d="M450 278 C330 278 330 100 244 100"></path>
+                        <path class="wire wire-i2c-alt" data-wiring="oled" tabindex="0" role="button" aria-label="OLED I2C wiring" d="M450 306 C318 306 318 130 244 130"></path>
+                        <path class="wire wire-analog" data-wiring="masterdist" tabindex="0" role="button" aria-label="Masterdist potentiometer wiring" d="M450 348 C330 348 292 264 206 264"></path>
+                        <path class="wire wire-analog-alt" data-wiring="twisterknob" tabindex="0" role="button" aria-label="Sloppy Twisted potentiometer wiring" d="M450 386 C320 386 292 406 206 406"></path>
+                        <path class="wire wire-digital" data-wiring="buttons" tabindex="0" role="button" aria-label="Preset button wiring" d="M670 320 C742 320 762 284 846 284"></path>
+                        <path class="wire wire-digital-alt" data-wiring="trig" tabindex="0" role="button" aria-label="Trigger jack wiring" d="M670 364 C760 364 776 414 860 414"></path>
+                        <path class="wire wire-audio" data-wiring="out" tabindex="0" role="button" aria-label="Audio output jack wiring" d="M670 410 C788 410 820 482 978 482"></path>
+                        <path class="wire wire-led" data-wiring="led" tabindex="0" role="button" aria-label="LED output wiring" d="M670 230 C760 230 780 104 866 104"></path>
+
+                        <g class="wiring-node wiring-seed active" data-wiring="seed" tabindex="0" role="button" aria-label="Daisy Seed overview">
+                            <rect x="450" y="150" width="220" height="310" rx="14"></rect>
+                            <text x="560" y="184">Daisy Seed</text>
+                            <text class="wiring-small" x="560" y="214">audio firmware brain</text>
+                            <circle cx="450" cy="188" r="5"></circle>
+                            <circle cx="450" cy="226" r="5"></circle>
+                            <circle cx="450" cy="278" r="5"></circle>
+                            <circle cx="450" cy="306" r="5"></circle>
+                            <circle cx="450" cy="348" r="5"></circle>
+                            <circle cx="450" cy="386" r="5"></circle>
+                            <circle cx="670" cy="230" r="5"></circle>
+                            <circle cx="670" cy="320" r="5"></circle>
+                            <circle cx="670" cy="364" r="5"></circle>
+                            <circle cx="670" cy="410" r="5"></circle>
+                            <text class="pin-label" x="462" y="191">3V3</text>
+                            <text class="pin-label" x="462" y="229">GND</text>
+                            <text class="pin-label" x="462" y="281">SCL</text>
+                            <text class="pin-label" x="462" y="309">SDA</text>
+                            <text class="pin-label" x="462" y="351">A0/D15</text>
+                            <text class="pin-label" x="462" y="389">A1?</text>
+                            <text class="pin-label pin-right" x="658" y="233">LED</text>
+                            <text class="pin-label pin-right" x="658" y="323">D2-D7</text>
+                            <text class="pin-label pin-right" x="658" y="367">TRIG</text>
+                            <text class="pin-label pin-right" x="658" y="413">OUT</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="oled" tabindex="0" role="button" aria-label="OLED display wiring">
+                            <rect x="64" y="52" width="180" height="96" rx="8"></rect>
+                            <rect x="84" y="76" width="140" height="48" rx="4"></rect>
+                            <text x="154" y="138">OLED</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="led" tabindex="0" role="button" aria-label="Panel LED wiring">
+                            <rect x="866" y="54" width="130" height="96" rx="8"></rect>
+                            <circle class="wiring-led-dot" cx="916" cy="100" r="18"></circle>
+                            <rect class="wiring-resistor" x="944" y="94" width="34" height="12" rx="4"></rect>
+                            <text x="931" y="136">LED</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="masterdist" tabindex="0" role="button" aria-label="Masterdist potentiometer wiring">
+                            <rect x="60" y="218" width="146" height="92" rx="8"></rect>
+                            <circle cx="133" cy="254" r="22"></circle>
+                            <line x1="133" y1="232" x2="133" y2="248"></line>
+                            <text x="133" y="294">Masterdist pot</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="twisterknob" tabindex="0" role="button" aria-label="Sloppy Twisted potentiometer wiring">
+                            <rect x="60" y="360" width="146" height="92" rx="8"></rect>
+                            <circle cx="133" cy="396" r="22"></circle>
+                            <line x1="133" y1="374" x2="133" y2="390"></line>
+                            <text x="133" y="436">Sloppy/Twisted</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="buttons" tabindex="0" role="button" aria-label="Preset button wiring">
+                            <rect x="846" y="220" width="214" height="118" rx="8"></rect>
+                            <text x="953" y="246">Preset buttons</text>
+                            <g class="button-dots">
+                                <circle cx="890" cy="282" r="12"></circle>
+                                <circle cx="928" cy="282" r="12"></circle>
+                                <circle cx="966" cy="282" r="12"></circle>
+                                <circle cx="1004" cy="282" r="12"></circle>
+                                <circle cx="910" cy="314" r="12"></circle>
+                                <circle cx="986" cy="314" r="12"></circle>
+                            </g>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="trig" tabindex="0" role="button" aria-label="Trigger jack wiring">
+                            <rect x="842" y="382" width="116" height="82" rx="8"></rect>
+                            <circle cx="900" cy="414" r="22"></circle>
+                            <circle cx="900" cy="414" r="8"></circle>
+                            <text x="900" y="452">Trig jack</text>
+                        </g>
+
+                        <g class="wiring-node" data-wiring="out" tabindex="0" role="button" aria-label="Audio output jack wiring">
+                            <rect x="976" y="382" width="112" height="122" rx="8"></rect>
+                            <circle cx="1032" cy="430" r="22"></circle>
+                            <circle cx="1032" cy="430" r="8"></circle>
+                            <text x="1032" y="468">Out jack</text>
+                            <text class="wiring-small" x="1032" y="486">mixer/interface</text>
+                        </g>
+                    </svg>
+                </div>
+
+                <aside class="wiring-inspector" aria-live="polite">
+                    <h2 id="wiringTitle">Daisy Seed overview</h2>
+                    <p id="wiringBody">The Daisy Seed sits across the breadboard center gap. Power rails feed shared 3V3 and GND, while each control or jack gets its own signal wire.</p>
+                    <dl>
+                        <div>
+                            <dt>Signal</dt>
+                            <dd id="wiringSignal">Audio firmware, controls, and panel I/O</dd>
+                        </div>
+                        <div>
+                            <dt>Status</dt>
+                            <dd id="wiringStatus">Overview</dd>
+                        </div>
+                    </dl>
+                </aside>
+            </div>
+        </section>
     </main>
 
     <div class="hardware-modal" id="hardwareModal" hidden>
@@ -557,6 +688,11 @@
             hardwareModalTitle: document.querySelector("#hardwareModalTitle"),
             hardwareModalBody: document.querySelector("#hardwareModalBody"),
             hardwareModalClose: document.querySelector("#hardwareModalClose"),
+            wiringTitle: document.querySelector("#wiringTitle"),
+            wiringBody: document.querySelector("#wiringBody"),
+            wiringSignal: document.querySelector("#wiringSignal"),
+            wiringStatus: document.querySelector("#wiringStatus"),
+            wiringTargets: Array.from(document.querySelectorAll("[data-wiring]")),
             presetSaveMode: document.querySelector("#presetSaveMode"),
             exportSlotPreset: document.querySelector("#exportSlotPreset"),
             importSlotPreset: document.querySelector("#importSlotPreset"),
@@ -909,6 +1045,69 @@
                     "Do not connect the output directly to a speaker. Use a mixer, audio interface, amp input, or eurorack output circuit.",
                     "Keep kOutputGain conservative in src/kicki.cpp if the output clips downstream."
                 ],
+            },
+        };
+
+        const wiringDetails = {
+            seed: {
+                title: "Daisy Seed overview",
+                body: "The Daisy Seed sits across the breadboard center gap. Power rails feed shared 3V3 and GND, while each control or jack gets its own signal wire.",
+                signal: "Audio firmware, controls, and panel I/O",
+                status: "Overview",
+            },
+            power: {
+                title: "3V3 rail",
+                body: "Daisy Seed 3V3 feeds the breadboard positive rail. Use it for OLED VCC and the outside legs of the potentiometers.",
+                signal: "Daisy 3V3 to breadboard + rail",
+                status: "Required",
+            },
+            ground: {
+                title: "GND rail",
+                body: "Daisy Seed GND feeds the breadboard ground rail. Every component needs a shared ground reference.",
+                signal: "Daisy GND to breadboard - rail",
+                status: "Required",
+            },
+            oled: {
+                title: "OLED display",
+                body: "Use a 128x64 SSD1306-style I2C OLED. Wire VCC and GND to the rails, then wire SCL and SDA to the I2C pins you reserve in firmware.",
+                signal: "3V3, GND, I2C SCL, I2C SDA",
+                status: "Preview only until OLED firmware is added",
+            },
+            led: {
+                title: "Panel LED",
+                body: "Wire the LED cathode to GND and the anode through a resistor to a free Daisy digital pin. Firmware still needs a small LED or PWM output.",
+                signal: "Digital output through 1k resistor",
+                status: "Suggested wiring",
+            },
+            masterdist: {
+                title: "Masterdist pot",
+                body: "Use a 10k linear potentiometer. Outside legs go to 3V3 and GND; the wiper goes to A0 / D15. Firmware already has this prepared, disabled by default.",
+                signal: "A0 / D15 analog input",
+                status: "Prepared in firmware",
+            },
+            twisterknob: {
+                title: "Sloppy/Twisted pot",
+                body: "Use a second 10k linear potentiometer. Outside legs go to 3V3 and GND; the wiper should go to a free analog input and be mapped to Master Kicki-Twister.",
+                signal: "Suggested free analog input",
+                status: "Needs firmware pin mapping",
+            },
+            buttons: {
+                title: "Preset buttons",
+                body: "Use six momentary buttons. One side of each button goes to GND; the other side goes to its own digital input with internal pull-up enabled.",
+                signal: "Six digital inputs",
+                status: "Suggested wiring",
+            },
+            trig: {
+                title: "Trig jack",
+                body: "Wire jack sleeve to GND and tip to a digital input protected for Daisy's 0V to 3V3 range. Firmware should trigger the kick on a rising edge.",
+                signal: "Digital trigger input",
+                status: "Needs firmware trigger input",
+            },
+            out: {
+                title: "Out jack",
+                body: "Wire jack sleeve to GND and tip to one Daisy audio output. Feed a mixer, audio interface, amp input, or eurorack output circuit, not a speaker directly.",
+                signal: "Daisy audio output",
+                status: "Firmware outputs mono to both audio channels",
             },
         };
 
@@ -1815,6 +2014,18 @@
             els.hardwareModal.hidden = true;
         }
 
+        function selectWiring(kind) {
+            const details = wiringDetails[kind] || wiringDetails.seed;
+
+            els.wiringTitle.textContent = details.title;
+            els.wiringBody.textContent = details.body;
+            els.wiringSignal.textContent = details.signal;
+            els.wiringStatus.textContent = details.status;
+            els.wiringTargets.forEach((target) => {
+                target.classList.toggle("active", target.dataset.wiring === kind);
+            });
+        }
+
         function startRepeat() {
             triggerKick();
             state.repeatTimer = setInterval(triggerKick, state.repeatMs);
@@ -2590,6 +2801,16 @@
         els.rackOutHelp.addEventListener("click", () => openHardwareModal("out"));
         els.hardwareModalClose.addEventListener("click", closeHardwareModal);
         els.hardwareModalBackdrop.addEventListener("click", closeHardwareModal);
+        els.wiringTargets.forEach((target) => {
+            target.addEventListener("click", () => selectWiring(target.dataset.wiring));
+            target.addEventListener("keydown", (event) => {
+                if(event.key === "Enter" || event.code === "Space") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    selectWiring(target.dataset.wiring);
+                }
+            });
+        });
         document.addEventListener("keydown", (event) => {
             if(event.key === "Escape" && !els.hardwareModal.hidden) {
                 closeHardwareModal();
@@ -2610,6 +2831,7 @@
         drawRackOled();
         drawSpectrumAnalyzer();
         drawOscilloscope();
+        selectWiring("seed");
     </script>
 </body>
 </html>
